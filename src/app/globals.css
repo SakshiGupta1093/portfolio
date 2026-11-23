@@ -1,0 +1,142 @@
+@import "tailwindcss";
+
+/*
+ * Dark mode is driven by a data-theme attribute on <html> (set before first
+ * paint by the inline script in ThemeScript), not by the media query alone.
+ * That lets a visitor override their system preference with the toggle.
+ */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
+/*
+ * WARM PALETTE: semantic design tokens.
+ * Components use names like bg-surface or text-ink-muted, never raw hex values,
+ * so the dark theme is just a second set of values for the same names.
+ * Every text/background pair below was checked for WCAG AA contrast (4.5:1+).
+ */
+:root {
+  color-scheme: light;
+
+  --canvas: #faf6f0; /* page background: warm cream */
+  --surface: #fffdf9; /* cards: a touch lighter than the page */
+  --surface-2: #f3ece3; /* soft beige for chips, inputs, alt sections */
+  --line: #e7dccd; /* borders and dividers */
+  --ink: #2d2420; /* main text: warm near-black brown */
+  --ink-muted: #6b5d52; /* secondary text */
+
+  --primary: #b4532a; /* main accent: terracotta */
+  --primary-hover: #9c4522;
+  --on-primary: #ffffff; /* text on a terracotta button */
+  --primary-soft: #f7e4d9; /* peach tint for chips and highlights */
+  --on-primary-soft: #8a3d1d;
+
+  --secondary: #56715a; /* secondary accent: sage green */
+  --secondary-soft: #e4ece1;
+  --on-secondary-soft: #3f5743;
+
+  --shadow-tint: rgb(92 62 40 / 0.07);
+  --shadow-tint-strong: rgb(92 62 40 / 0.12);
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --canvas: #1e1916; /* warm dark brown, not blue-black */
+  --surface: #29221e;
+  --surface-2: #332a25;
+  --line: #43372f;
+  --ink: #f3eae0;
+  --ink-muted: #bcad9f;
+
+  --primary: #e58b63; /* lighter terracotta so it reads on dark */
+  --primary-hover: #efa17e;
+  --on-primary: #1e1916;
+  --primary-soft: #45291d;
+  --on-primary-soft: #f4bfa4;
+
+  --secondary: #9db89d;
+  --secondary-soft: #2c3a2d;
+  --on-secondary-soft: #bcd3bb;
+
+  --shadow-tint: rgb(0 0 0 / 0.25);
+  --shadow-tint-strong: rgb(0 0 0 / 0.4);
+}
+
+/* Expose the tokens to Tailwind: bg-canvas, text-ink, border-line, bg-primary, rounded-card, shadow-soft, font-display... */
+@theme inline {
+  --color-canvas: var(--canvas);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-on-primary: var(--on-primary);
+  --color-primary-soft: var(--primary-soft);
+  --color-on-primary-soft: var(--on-primary-soft);
+
+  --color-secondary: var(--secondary);
+  --color-secondary-soft: var(--secondary-soft);
+  --color-on-secondary-soft: var(--on-secondary-soft);
+
+  --font-sans: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-heading), var(--font-body), ui-sans-serif, sans-serif;
+
+  --radius-card: 1.5rem;
+  --radius-pill: 9999px;
+
+  --shadow-soft: 0 1px 2px var(--shadow-tint), 0 6px 20px -8px var(--shadow-tint-strong);
+  --shadow-lift: 0 2px 4px var(--shadow-tint), 0 16px 36px -12px var(--shadow-tint-strong);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--canvas);
+    color: var(--ink);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    transition:
+      background-color 300ms ease,
+      color 300ms ease;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-heading), var(--font-body), ui-sans-serif, sans-serif;
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background-color: var(--primary-soft);
+    color: var(--on-primary-soft);
+  }
+
+  /* Visible, on-brand keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--primary);
+    outline-offset: 3px;
+    border-radius: 0.5rem;
+  }
+
+  /* Respect visitors who ask for less motion. */
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}

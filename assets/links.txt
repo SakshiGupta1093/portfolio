@@ -1,0 +1,22 @@
+Email: sakshigupta1093@gmail.com
+LinkedIn: https://www.linkedin.com/in/sakshi-gupta-neu/
+GitHub profile: https://github.com/SakshiGupta1093
+
+EDGARQuery repo: https://github.com/SakshiGupta1093/EDGARQuery
+GHOSTLINE repo: https://github.com/SakshiGupta1093/ghostline
+GHOSTLINE live demo: https://ghostline-eta.vercel.app/
+AOWA repo (only if allowed to share): 
+Fraud Detection repo: 
+EchoCoach repo: https://github.com/vatsalp2008/EchoCoach
+Multi-LLM Eval repo: https://github.com/SakshiGupta1093/Multi-LLM-Eval
+Third Place Finder repo: https://github.com/shravanibnikam/Third-Place-Finder-Web
+Rideshare Simulator repo: 
+Email Automation repo: https://github.com/SakshiGupta1093/Email-Workflow-Automation-using-Agentic-AI
+Document Similarity repo: 
+Brain Tumor Detection repo: 
+Resume Screening repo: https://github.com/SakshiGupta1093/Resume-Screening-Using-Machine-Learning-Techniques
+Drug Corpora repo: 
+Investor Risk repo: 
+Parkinson's paper link: http://www.vidhyayanaejournal.org/index.php/journal/article/view/e5j3jh60
+Drug NER paper link: https://link.springer.com/chapter/10.1007/978-981-96-1452-3_23
+Crop Prediction paper link: https://doi.org/10.1109/ICSCNA58489.2023.10370674

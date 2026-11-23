@@ -1,0 +1,939 @@
+/**
+ * SITE CONTENT: the single source of truth.
+ *
+ * Every section of the home page, the case study pages, and the chatbot's
+ * knowledge file read from this file. To update the site, edit only this file.
+ *
+ * Editing rules:
+ * 1. Only verified facts. Never add a metric, skill, feature, or employer that isn't real.
+ * 2. Anything missing uses todo("what is missing"). During `npm run dev` these show
+ *    up as dashed TODO badges; production builds hide them automatically.
+ *    Search this file for `todo(` to find every gap.
+ * 3. House style: no em dashes in any copy.
+ */
+
+/* -------------------------------------------------------------------------- */
+/*  TODO helper                                                                */
+/* -------------------------------------------------------------------------- */
+
+export type Todo = { readonly todo: string };
+
+/** Marks missing content. The UI hides it in production and flags it in dev. */
+export const todo = (what: string): Todo => ({ todo: what });
+
+export function isTodo(value: unknown): value is Todo {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    typeof (value as { todo?: unknown }).todo === "string"
+  );
+}
+
+/** A value we have, or a TODO describing what is missing. */
+export type OrTodo<T> = T | Todo;
+
+/* -------------------------------------------------------------------------- */
+/*  Tracks (All | SWE | ML/AI | Data)                                          */
+/* -------------------------------------------------------------------------- */
+
+export const TRACK_IDS = ["all", "swe", "ml", "data"] as const;
+export type Track = (typeof TRACK_IDS)[number];
+/** A specific track, used to tag projects. "all" is not a tag. */
+export type FocusTrack = Exclude<Track, "all">;
+
+export interface TrackInfo {
+  id: Track;
+  /** Label on the track switcher. */
+  label: string;
+  /** URL hash without "#". Empty for All, so the plain URL means All. */
+  hash: string;
+  /** Hero tagline for this track. */
+  tagline: string;
+  /** Resume the Resume button downloads on this track. */
+  resume: { href: string; downloadName: string };
+}
+
+export const tracks: Record<Track, TrackInfo> = {
+  all: {
+    id: "all",
+    label: "All",
+    hash: "",
+    tagline: "Versatile engineer across full-stack, ML pipelines, and agentic AI",
+    resume: { href: "/resumes/resume-general.pdf", downloadName: "Sakshi_Gupta_Resume.pdf" },
+  },
+  swe: {
+    id: "swe",
+    label: "SWE",
+    hash: "swe",
+    tagline: "Full-stack and distributed systems builder",
+    resume: { href: "/resumes/resume-swe.pdf", downloadName: "Sakshi_Gupta_Resume_SWE.pdf" },
+  },
+  ml: {
+    id: "ml",
+    label: "ML/AI",
+    hash: "ml",
+    tagline: "RAG, agents, and LLM evaluation",
+    resume: { href: "/resumes/resume-ml.pdf", downloadName: "Sakshi_Gupta_Resume_ML.pdf" },
+  },
+  data: {
+    id: "data",
+    label: "Data",
+    hash: "data",
+    tagline: "Data pipelines, validation, and dashboards",
+    resume: { href: "/resumes/resume-data.pdf", downloadName: "Sakshi_Gupta_Resume_Data.pdf" },
+  },
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Profile, site, and links                                                   */
+/* -------------------------------------------------------------------------- */
+
+export const profile = {
+  name: "Sakshi Gupta",
+  firstName: "Sakshi",
+  headline: "MS Computer Science student at Northeastern University, Seattle",
+  openTo: "Open to SWE, ML/AI, and Data roles",
+  location: "Seattle",
+  email: "sakshigupta1093@gmail.com",
+  headshot: {
+    src: "/images/headshot.jpg",
+    alt: "Portrait of Sakshi Gupta smiling outdoors",
+  },
+  /** About section: 3 short lines. */
+  about: [
+    "I'm an MS Computer Science student at Northeastern University in Seattle, working as a versatile generalist across full-stack development, ML pipelines, and agentic AI tooling.",
+    "Recently I built a multi-agent RAG system over SEC filings, was part of the team that won Judges' Choice at Defense Tech Jam Seattle with a 3D tactical game, and served as Project Manager and QA Lead on a source-labeled knowledge graph with an industry partner.",
+    "Before that, I built ML pipelines as an AI Intern at Amdocs and automated data workflows and dashboards as a Data Analytics Associate at Northeastern.",
+  ],
+  links: {
+    github: "https://github.com/SakshiGupta1093",
+    linkedin: "https://www.linkedin.com/in/sakshi-gupta-neu/",
+    email: "mailto:sakshigupta1093@gmail.com",
+  },
+} as const;
+
+export const site = {
+  title: "Sakshi Gupta | Software, ML/AI, and Data",
+  description:
+    "Portfolio of Sakshi Gupta, MS Computer Science student at Northeastern University in Seattle. Full-stack systems, RAG and agentic AI, and data pipelines.",
+  url: todo("Production URL after the first Vercel deploy (used for SEO and Open Graph)") as OrTodo<string>,
+  builtWith: "Built with Next.js, Tailwind, and Groq",
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Tools (every tool in the Tech Stack section)                               */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Registry of every tool, keyed by a stable id. Projects reference these ids,
+ * so a typo is a compile error, not a silently broken highlight.
+ */
+export const tools = {
+  // Languages
+  java: "Java",
+  typescript: "TypeScript",
+  javascript: "JavaScript",
+  python: "Python",
+  "c-cpp": "C/C++",
+  sql: "SQL",
+  r: "R",
+  // Frontend
+  react: "React",
+  nextjs: "Next.js",
+  tailwind: "Tailwind CSS",
+  threejs: "Three.js",
+  // Backend
+  "node-express": "Node/Express",
+  fastapi: "FastAPI",
+  asyncio: "asyncio",
+  "rest-apis": "REST APIs",
+  oauth: "OAuth",
+  // Databases
+  postgresql: "PostgreSQL",
+  mysql: "MySQL",
+  duckdb: "DuckDB",
+  neo4j: "Neo4j/Cypher",
+  hadoop: "Hadoop",
+  // Machine learning
+  pytorch: "PyTorch",
+  tensorflow: "TensorFlow/Keras",
+  "scikit-learn": "scikit-learn",
+  xgboost: "XGBoost",
+  numpy: "NumPy",
+  // LLMs and agents
+  transformers: "Hugging Face Transformers",
+  langchain: "LangChain",
+  crewai: "CrewAI",
+  rag: "RAG",
+  "llm-judge": "LLM-as-judge evaluation",
+  // Retrieval
+  faiss: "FAISS",
+  embeddings: "Embeddings",
+  "cross-encoder": "Cross-encoder re-ranking",
+  // NLP and vision
+  spacy: "spaCy",
+  nltk: "NLTK",
+  gensim: "Gensim",
+  "sentence-transformers": "Sentence-Transformers",
+  opencv: "OpenCV",
+  // Dashboards
+  "power-bi": "Power BI",
+  streamlit: "Streamlit",
+  // Data collection and quality
+  beautifulsoup: "BeautifulSoup",
+  "regex-validation": "Regex validation",
+  // Tools and CI
+  git: "Git",
+  "github-actions": "GitHub Actions",
+  pytest: "pytest",
+  aws: "AWS",
+  "claude-code": "Claude Code",
+} as const;
+
+export type ToolId = keyof typeof tools;
+
+/* -------------------------------------------------------------------------- */
+/*  Tech Stack section                                                         */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Categories for the "All" view. Each track group below maps into one of these,
+ * and the All view removes duplicates (for example, FastAPI appears in both
+ * SWE Backend and ML Serving but shows once under "Backend and APIs").
+ */
+export const ALL_STACK_CATEGORIES = [
+  "Languages",
+  "Frontend",
+  "Backend and APIs",
+  "Databases",
+  "Machine learning",
+  "LLMs and agents",
+  "Retrieval",
+  "NLP and vision",
+  "Dashboards",
+  "Data collection and quality",
+  "Tools and CI",
+] as const;
+
+export type AllStackCategory = (typeof ALL_STACK_CATEGORIES)[number];
+
+export interface StackGroup {
+  name: string;
+  /** Where this group's tools go in the All view. */
+  allCategory: AllStackCategory;
+  tools: ToolId[];
+}
+
+export const techStack: Record<FocusTrack, StackGroup[]> = {
+  swe: [
+    { name: "Languages", allCategory: "Languages", tools: ["java", "typescript", "javascript", "python", "c-cpp"] },
+    { name: "Frontend", allCategory: "Frontend", tools: ["react", "nextjs", "tailwind", "threejs"] },
+    { name: "Backend", allCategory: "Backend and APIs", tools: ["node-express", "fastapi", "asyncio", "rest-apis", "oauth"] },
+    { name: "Databases", allCategory: "Databases", tools: ["postgresql", "mysql"] },
+    { name: "Tools", allCategory: "Tools and CI", tools: ["git", "github-actions", "pytest", "aws", "claude-code"] },
+  ],
+  ml: [
+    { name: "Core ML", allCategory: "Machine learning", tools: ["pytorch", "tensorflow", "scikit-learn", "xgboost"] },
+    { name: "LLMs and agents", allCategory: "LLMs and agents", tools: ["transformers", "langchain", "crewai", "rag", "llm-judge"] },
+    { name: "Retrieval", allCategory: "Retrieval", tools: ["faiss", "embeddings", "cross-encoder"] },
+    { name: "NLP and vision", allCategory: "NLP and vision", tools: ["spacy", "nltk", "gensim", "sentence-transformers", "opencv"] },
+    { name: "Serving", allCategory: "Backend and APIs", tools: ["fastapi"] },
+  ],
+  data: [
+    { name: "Languages", allCategory: "Languages", tools: ["python", "sql", "r"] },
+    { name: "Databases", allCategory: "Databases", tools: ["duckdb", "postgresql", "mysql", "neo4j", "hadoop"] },
+    { name: "Analysis and ML", allCategory: "Machine learning", tools: ["scikit-learn", "xgboost", "numpy"] },
+    { name: "Dashboards", allCategory: "Dashboards", tools: ["power-bi", "streamlit"] },
+    { name: "Data collection and quality", allCategory: "Data collection and quality", tools: ["beautifulsoup", "regex-validation", "pytest", "github-actions"] },
+  ],
+};
+
+/* -------------------------------------------------------------------------- */
+/*  Featured case studies                                                      */
+/* -------------------------------------------------------------------------- */
+
+export type CaseStudySlug = "edgarquery" | "ghostline" | "aowa-knowledge-graph" | "fraud-detection";
+
+export interface ArchitectureStage {
+  title: string;
+  items: string[];
+}
+
+/** Data for the case study's SVG diagram. */
+export interface Architecture {
+  /** Plain-text description of the diagram for screen readers. */
+  summary: string;
+  /** Main flow, drawn left to right (top to bottom on mobile). */
+  stages: ArchitectureStage[];
+  /** A supporting layer drawn under the flow, such as testing or CI. */
+  support?: ArchitectureStage;
+  /** Short caption under the diagram. */
+  note?: string;
+}
+
+export interface Result {
+  value: string;
+  label: string;
+  /** Whose result this is, when the project was a team effort. */
+  scope?: "team" | "mine";
+}
+
+export interface CaseStudy {
+  slug: CaseStudySlug;
+  title: string;
+  /** Tracks this case study is most relevant to. Drives the featured order per track. */
+  tracks: FocusTrack[];
+  /** One or two sentences for the card. */
+  summary: string;
+  /** Short team label for the card, such as "Solo project". */
+  teamLabel: OrTodo<string>;
+  /** Short highlight pills for the card. */
+  badges: string[];
+  problem: string[];
+  role: OrTodo<{ summary: string; groups: { heading: string; items: string[] }[] }>;
+  architecture: Architecture;
+  decisions: { title: string; detail: string }[];
+  /** Only real numbers. An empty list hides the Results section. */
+  results: Result[];
+  next: OrTodo<string[]>;
+  /** Stack chips, exactly as listed in the source content. */
+  stack: string[];
+  /** Tools from the Tech Stack section that this project used (for click-to-highlight). */
+  toolIds: ToolId[];
+  /** null means "not applicable" (for example, a project that only runs locally has no live demo). */
+  links: { github: OrTodo<string> | null; demo: OrTodo<string> | null };
+  screenshots: OrTodo<{ src: string; alt: string }[]>;
+}
+
+/** Listed in the order used on the "All" track. */
+export const caseStudies: CaseStudy[] = [
+  {
+    slug: "edgarquery",
+    title: "EDGARQuery",
+    tracks: ["ml"],
+    summary:
+      "Multi-agent, multimodal RAG over SEC 10-K and 10-Q filings that answers questions with a citation to the source filing and section.",
+    teamLabel: "Solo project",
+    badges: ["Multi-agent RAG", "Works end to end, runs locally"],
+    problem: [
+      "SEC 10-K and 10-Q filings are long, and the answer to a question can sit in narrative text, a table, or a chart.",
+      "EDGARQuery pulls filings from the SEC EDGAR API, indexes all three kinds of content, and answers questions with a citation to the exact filing and section, so every answer can be checked.",
+    ],
+    role: {
+      summary:
+        "Solo project. I designed and built the whole system, and it works end to end, running locally.",
+      groups: [
+        {
+          heading: "What I built",
+          items: [
+            "Ingestion of 10-K and 10-Q filings from the SEC EDGAR API, indexing narrative text, tables, and charts",
+            "Retrieval with bge-small embeddings in a FAISS index, cross-encoder re-ranking, and CLIP/ColPali for tables and charts",
+            "A LangChain/CrewAI setup that routes each question to a narrative, financials, or risk factors agent",
+            "Generation with Qwen2.5-1.5B, plus a self-reflection step that re-checks weak answers",
+            "A custom evaluation harness (precision/recall and LLM-as-judge faithfulness) wired into CI with pytest and GitHub Actions",
+          ],
+        },
+      ],
+    },
+    architecture: {
+      summary:
+        "Filings come from the SEC EDGAR API and are indexed as narrative text, tables, and charts using bge-small embeddings in FAISS, with CLIP/ColPali for tables and charts. Each question is routed by LangChain/CrewAI to a narrative, financials, or risk factors agent. Retrieved passages are re-ranked by a cross-encoder, Qwen2.5-1.5B generates the answer, and a self-reflection step re-checks weak answers before returning an answer that cites the filing and section. An evaluation harness runs in CI.",
+      stages: [
+        { title: "Ingest", items: ["SEC EDGAR API", "10-K and 10-Q filings", "Text, tables, charts"] },
+        { title: "Index", items: ["bge-small embeddings", "FAISS index", "CLIP/ColPali for tables and charts"] },
+        { title: "Route", items: ["LangChain/CrewAI", "Narrative agent", "Financials agent", "Risk factors agent"] },
+        { title: "Retrieve", items: ["FAISS search", "Cross-encoder re-ranking"] },
+        { title: "Answer", items: ["Qwen2.5-1.5B", "Self-reflection re-check", "Cites filing and section"] },
+      ],
+      support: {
+        title: "Evaluation in CI",
+        items: ["Precision and recall", "LLM-as-judge faithfulness", "pytest + GitHub Actions"],
+      },
+      note: "Runs locally, end to end.",
+    },
+    decisions: [
+      {
+        title: "Retrieve wide, then re-rank",
+        detail:
+          "FAISS over bge-small embeddings finds candidate passages quickly, then a cross-encoder scores each candidate against the question so the strongest evidence reaches the model.",
+      },
+      {
+        title: "Index tables and charts, not just text",
+        detail:
+          "Filings carry important information in tables and charts, so these are indexed alongside narrative text and retrieved with CLIP/ColPali.",
+      },
+      {
+        title: "Specialist agents",
+        detail:
+          "LangChain/CrewAI routes each question to a narrative, financials, or risk factors agent, so each agent handles one kind of question.",
+      },
+      {
+        title: "Verify and cite every answer",
+        detail:
+          "A self-reflection step re-checks weak answers, and every answer cites its source filing and section so a reader can confirm it.",
+      },
+      {
+        title: "Evaluation wired into CI",
+        detail:
+          "A custom harness measures retrieval precision and recall plus LLM-as-judge faithfulness, and it runs with pytest in GitHub Actions on every change.",
+      },
+      {
+        title: "A small model that runs locally",
+        detail: "Generation uses Qwen2.5-1.5B, and the full pipeline runs on a local machine.",
+      },
+    ],
+    results: [], // No metric numbers yet, so the Results section is hidden.
+    next: todo("EDGARQuery: what you'd do next"),
+    stack: [
+      "Python",
+      "SEC EDGAR API",
+      "FAISS",
+      "bge-small",
+      "Cross-encoder",
+      "Qwen2.5-1.5B",
+      "LangChain",
+      "CrewAI",
+      "CLIP/ColPali",
+      "pytest",
+      "GitHub Actions",
+    ],
+    toolIds: ["python", "faiss", "embeddings", "cross-encoder", "langchain", "crewai", "rag", "llm-judge", "pytest", "github-actions"],
+    links: { github: todo("EDGARQuery repo URL"), demo: null },
+    screenshots: todo("EDGARQuery screenshots (add to assets/screenshots)"),
+  },
+  {
+    slug: "ghostline",
+    title: "GHOSTLINE",
+    tracks: ["swe"],
+    summary:
+      "A turn-based 3D tactical game exploring human-AI trust calibration. Won the Judges' Choice Award at Defense Tech Jam Seattle.",
+    teamLabel: "Team of 4",
+    badges: ["Judges' Choice Award", "Fully offline, no backend"],
+    problem: [
+      "When should people trust an AI, and when should they question it? GHOSTLINE explores human-AI trust calibration through a turn-based tactical game.",
+      "Our team of 4 won the Judges' Choice Award at Defense Tech Jam Seattle in September 2026.",
+      "The game runs fully offline in the browser with no backend: about 18k lines of vanilla JavaScript covering game logic, a Three.js 3D scene, audio, speech, and gamepad input.",
+    ],
+    role: {
+      summary:
+        "Team of 4. I owned the game logic, the Three.js 3D scene, and testing, and I reviewed my teammates' pull requests.",
+      groups: [
+        {
+          heading: "What I owned",
+          items: ["Game logic", "The Three.js 3D scene", "Testing"],
+        },
+        {
+          heading: "Team work",
+          items: ["Reviewed teammates' pull requests"],
+        },
+      ],
+    },
+    architecture: {
+      summary:
+        "A browser-only game with no backend. The Gamepad, Web Speech, and Web Audio APIs connect to the turn-based game logic, written as vanilla JavaScript ES modules, which drives a Three.js 3D scene animated with GSAP. It is bundled with Vite and tested with state-space verification, headless end-to-end tests in Chromium, and gamepad input simulation.",
+      stages: [
+        { title: "Browser APIs", items: ["Gamepad API", "Web Speech API", "Web Audio API"] },
+        { title: "Game logic", items: ["Turn-based rules and state", "Vanilla JS ES modules"] },
+        { title: "3D scene", items: ["Three.js", "GSAP animation"] },
+      ],
+      support: {
+        title: "Testing",
+        items: ["State-space verification (~6.5M assertions)", "Headless E2E tests in Chromium", "Gamepad input simulation"],
+      },
+      note: "Bundled with Vite. Runs fully offline with no backend.",
+    },
+    decisions: [
+      {
+        title: "No backend",
+        detail: "The whole game runs in the browser and works fully offline, so there is no server to deploy or keep running.",
+      },
+      {
+        title: "Vanilla JavaScript with ES modules",
+        detail: "About 18k lines of vanilla JavaScript organized as ES modules and bundled with Vite.",
+      },
+      {
+        title: "Exhaustive state-space verification",
+        detail: "Instead of spot-checking a few scenarios, the tests verify the game's state space exhaustively, about 6.5M assertions in total.",
+      },
+      {
+        title: "Test the way a player plays",
+        detail: "Headless end-to-end tests run in Chromium with simulated gamepad input, so the real input path is covered.",
+      },
+      {
+        title: "Built on browser APIs",
+        detail: "Sound, speech, and controller support use the Web Audio, Web Speech, and Gamepad APIs built into the browser.",
+      },
+    ],
+    results: [
+      { value: "Judges' Choice", label: "Award at Defense Tech Jam Seattle 2026", scope: "team" },
+      { value: "~6.5M", label: "assertions in state-space verification", scope: "team" },
+      { value: "~18k", label: "lines of code, fully offline", scope: "team" },
+    ],
+    next: todo("GHOSTLINE: what you'd do next"),
+    stack: ["Three.js", "GSAP", "Vite", "Vanilla JS (ES modules)", "Web Audio API", "Web Speech API", "Gamepad API"],
+    toolIds: ["threejs", "javascript"],
+    links: {
+      github: todo("GHOSTLINE repo URL"),
+      demo: "https://ghostline-eta.vercel.app/",
+    },
+    screenshots: todo("GHOSTLINE screenshots (add to assets/screenshots)"),
+  },
+  {
+    slug: "aowa-knowledge-graph",
+    title: "AOWA Knowledge Graph",
+    tracks: ["data"],
+    summary:
+      "A source-labeled knowledge graph of anesthesia resources across Ghana hospitals, built with industry partner Efeeo to map what is known, assumed, and missing before any AI tool is built.",
+    teamLabel: "Team of 4, with industry partner Efeeo",
+    badges: ["Project Manager and QA Lead", "Industry partner"],
+    problem: [
+      "AI tools and medical references assume Western hospital resources. In Ghana, much hospital knowledge lives in clinicians' memory and paper records.",
+      "This project maps what is known, what is assumed, and what is missing, before any AI tool is built on top of it.",
+    ],
+    role: {
+      summary:
+        "Team of 4 graduate students working with industry partner Efeeo (efeeo4good). I was Project Manager and QA Lead, and I also wrote validation code and tests.",
+      groups: [
+        {
+          heading: "Engineering",
+          items: [
+            "Designed 4 Python safety validation rules covering 5 blind spots the partner's validator missed",
+            "Extended scanning from 2 columns to every field across 4 data files while handling false positives",
+            "Made sure validation errors never print flagged values, keeping partner data out of CI logs",
+          ],
+        },
+        {
+          heading: "Testing",
+          items: ["Wrote 67 test cases", "Expanded CI from 30 to 96 automated tests"],
+        },
+        {
+          heading: "Project management and QA",
+          items: [
+            "Split 15 validator gaps across 3 engineers by domain",
+            "Led code review of the team's core PR",
+            "Owned the safety boundary and responsible-AI compliance",
+          ],
+        },
+      ],
+    },
+    architecture: {
+      summary:
+        "Facts live in CSV files as the source of record, each with a provenance label and review status. Python safety validation rules check every field across the data files. The knowledge graph is stored in Neo4j and queried with Cypher, covering 3 hospital levels and 6 categories, with unknowns recorded as gaps. pytest suites run in GitHub Actions.",
+      stages: [
+        { title: "Source of record", items: ["CSV files", "Provenance label per fact", "Review status per fact"] },
+        { title: "Validation", items: ["Python safety rules", "Regex checks on every field", "No flagged values in logs"] },
+        { title: "Knowledge graph", items: ["Neo4j + Cypher", "3 hospital levels x 6 categories", "Unknowns recorded as gaps"] },
+      ],
+      support: {
+        title: "CI (GitHub Actions)",
+        items: ["96 automated pytest tests", "Scenario tests"],
+      },
+      note: "No treatment or dosing advice. No partner data is shown on this site.",
+    },
+    decisions: [
+      {
+        title: "CSV as the source of record",
+        detail: "Facts live in plain CSV files, and the Neo4j graph is built from them.",
+      },
+      {
+        title: "Provenance on every fact",
+        detail: "Every fact carries a provenance label and a review status, so it is clear where it came from and whether it has been checked.",
+      },
+      {
+        title: "Record unknowns as gaps",
+        detail:
+          "Missing knowledge is recorded as an explicit gap instead of being guessed, so the 18-cell coverage map (3 hospital levels x 6 categories) shows what is not known.",
+      },
+      {
+        title: "A hard safety boundary",
+        detail: "The graph contains no treatment or dosing advice.",
+      },
+      {
+        title: "Keep partner data out of logs",
+        detail: "Validation errors never print the flagged values, so partner data stays out of CI logs.",
+      },
+    ],
+    results: [
+      { value: "22 of 24", label: "facts traceable to a source, up from about 1 of 24", scope: "team" },
+      { value: "18 of 18", label: "coverage map cells filled or recorded as gaps, up from 8", scope: "team" },
+      { value: "14 of 14", label: "scenario tests passing", scope: "team" },
+      { value: "30 to 96", label: "automated tests in CI", scope: "mine" },
+      { value: "67", label: "test cases written", scope: "mine" },
+      { value: "5", label: "validator blind spots covered by 4 new safety rules", scope: "mine" },
+    ],
+    // Keep planned features out of this list (per partner agreement).
+    next: todo("AOWA: what you'd do next (do not mention planned features)"),
+    stack: ["Python", "CSV (source of record)", "Neo4j", "Cypher", "pytest", "Regex validation", "GitHub Actions"],
+    toolIds: ["python", "neo4j", "pytest", "regex-validation", "github-actions"],
+    links: {
+      github: todo("AOWA repo URL, only if Efeeo allows sharing"),
+      demo: null,
+    },
+    screenshots: todo("AOWA screenshots, with no partner data (add to assets/screenshots)"),
+  },
+  {
+    slug: "fraud-detection",
+    title: "Transaction Fraud Anomaly Detection",
+    tracks: ["data"],
+    summary:
+      "Fraud detection on 6.3M PaySim transactions, with SQL feature engineering in DuckDB, Isolation Forest vs XGBoost, and a Streamlit dashboard.",
+    teamLabel: todo("Fraud Detection: solo or team?"),
+    badges: ["6.3M transactions", "0.55 PR-AUC"],
+    problem: [
+      "Fraud is a small fraction of a very large stream of transactions, so a useful model has to catch fraud without burying reviewers in false alarms.",
+      "This project works with 6.3M PaySim transactions and evaluates models the way they would be used: trained on earlier transactions and tested on later ones.",
+    ],
+    role: todo("Fraud Detection: your role, and whether it was solo or a team"),
+    architecture: {
+      summary:
+        "6.3M PaySim transactions are loaded into DuckDB. Time-series features are built with SQL window functions. Isolation Forest and XGBoost are compared using a time-based train/test split, and results are shown in a Streamlit dashboard.",
+      stages: [
+        { title: "Data", items: ["6.3M PaySim transactions", "DuckDB"] },
+        { title: "Features", items: ["SQL window functions", "Time-series features"] },
+        { title: "Models", items: ["Time-based train/test split", "Isolation Forest", "XGBoost"] },
+        { title: "Dashboard", items: ["Streamlit"] },
+      ],
+    },
+    decisions: [
+      {
+        title: "DuckDB for 6.3M rows",
+        detail: "DuckDB runs analytical SQL over the full dataset in-process, with no database server to manage.",
+      },
+      {
+        title: "Features in SQL",
+        detail: "Time-series features are computed with SQL window functions.",
+      },
+      {
+        title: "Time-based split",
+        detail: "Training on earlier transactions and testing on later ones keeps future information out of training.",
+      },
+      {
+        title: "Unsupervised vs supervised",
+        detail: "Isolation Forest (anomaly detection) was compared against XGBoost (supervised classification).",
+      },
+      {
+        title: "Metrics that fit rare events",
+        detail: "Because fraud is rare, models are judged on PR-AUC and precision at a given recall rather than accuracy.",
+      },
+    ],
+    results: [
+      { value: "0.55", label: "PR-AUC (XGBoost)" },
+      { value: "78%", label: "precision at 65% recall (XGBoost)" },
+      { value: "6.3M", label: "transactions analyzed" },
+    ],
+    next: todo("Fraud Detection: what you'd do next"),
+    stack: ["DuckDB", "SQL window functions", "Isolation Forest", "XGBoost", "Streamlit"],
+    toolIds: ["duckdb", "sql", "xgboost", "streamlit"],
+    links: {
+      github: todo("Fraud Detection repo URL"),
+      demo: todo("Fraud Detection Streamlit demo URL, if it is deployed (otherwise set to null)"),
+    },
+    screenshots: todo("Fraud Detection dashboard screenshots (add to assets/screenshots)"),
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  More projects grid                                                         */
+/* -------------------------------------------------------------------------- */
+
+export interface Project {
+  slug: string;
+  title: string;
+  tracks: FocusTrack[];
+  summary: string;
+  /** Team context, only when known (for example "Two-person team"). */
+  context?: string;
+  /** A real outcome or number, only when given. */
+  highlight?: string;
+  stack: string[];
+  toolIds: ToolId[];
+  links: { github: OrTodo<string> };
+}
+
+export const projects: Project[] = [
+  {
+    slug: "echocoach",
+    title: "EchoCoach",
+    tracks: ["swe", "ml"],
+    summary:
+      "An AI mock-interview coach with a persistent weakness graph that routes follow-up questions to weak areas. Includes Gemini vision grading of whiteboard sketches and a voice mode.",
+    context: "Team hackathon project",
+    stack: [
+      "Python",
+      "FastAPI",
+      "Cognee (graph-vector memory)",
+      "PostgreSQL",
+      "Gemini",
+      "Next.js",
+      "TypeScript",
+      "Tailwind",
+      "Monaco Editor",
+      "Web Speech API",
+    ],
+    toolIds: ["python", "fastapi", "postgresql", "nextjs", "typescript", "tailwind"],
+    links: { github: todo("EchoCoach repo URL") },
+  },
+  {
+    slug: "multi-llm-eval",
+    title: "Multi-LLM Comparison and Eval Platform",
+    tracks: ["swe", "ml"],
+    summary:
+      "Sends the same prompt to GPT-4, Claude, and Gemini concurrently through OpenRouter and scores the answers with an LLM judge on accuracy, groundedness, and reasoning. If one provider fails, the run continues.",
+    stack: ["FastAPI", "asyncio", "OpenRouter", "GPT-4", "Claude", "Gemini", "LLM-as-judge", "React", "TypeScript"],
+    toolIds: ["fastapi", "asyncio", "llm-judge", "react", "typescript"],
+    links: { github: todo("Multi-LLM Eval repo URL") },
+  },
+  {
+    slug: "third-place-finder",
+    title: "Third Place Finder",
+    tracks: ["swe"],
+    summary:
+      "Recommends nearby public spaces using geolocation, with LLM chat onboarding through Groq and results shown on Leaflet maps.",
+    context: "Two-person team",
+    highlight: "Used by many classmates",
+    stack: ["React", "TypeScript", "Node/Express", "MySQL", "Groq", "Leaflet"],
+    toolIds: ["react", "typescript", "node-express", "mysql"],
+    links: { github: todo("Third Place Finder repo URL") },
+  },
+  {
+    slug: "rideshare-dispatch-simulator",
+    title: "Rideshare Dispatch Simulator",
+    tracks: ["swe"],
+    summary:
+      "An event-driven Java simulation of ride dispatch using the Strategy and Observer patterns, ReentrantLock concurrency, and Java Streams.",
+    highlight: "100% completion across 3 load scenarios, up to 250 concurrent rides",
+    stack: ["Java", "Strategy pattern", "Observer pattern", "ReentrantLock", "Java Streams"],
+    toolIds: ["java"],
+    links: { github: todo("Rideshare Simulator repo URL") },
+  },
+  {
+    slug: "email-workflow-automation",
+    title: "Email Workflow Automation",
+    tracks: ["ml"],
+    summary: "Agents classify, summarize, and route Gmail messages into ClickUp tasks using tool calling.",
+    stack: ["Python", "Gmail API", "Gemini API", "LangChain", "CrewAI"],
+    toolIds: ["python", "langchain", "crewai"],
+    links: { github: todo("Email Automation repo URL") },
+  },
+  {
+    slug: "document-similarity",
+    title: "Document Similarity Comparison",
+    tracks: ["ml"],
+    summary: "Compares TF-IDF, Doc2Vec, and BERT embeddings for document similarity using cosine similarity.",
+    context: "Joint work",
+    highlight: "BERT performed best, at 0.821",
+    stack: ["spaCy", "NLTK", "Gensim", "Sentence-Transformers", "TF-IDF", "Doc2Vec", "BERT"],
+    toolIds: ["spacy", "nltk", "gensim", "sentence-transformers", "embeddings"],
+    links: { github: todo("Document Similarity repo URL") },
+  },
+  {
+    slug: "brain-tumor-detection",
+    title: "Brain Tumor Detection",
+    tracks: ["ml"],
+    summary: "A simplified LeNet CNN that classifies MRI scans into 4 classes, trained with data augmentation.",
+    highlight: "3,264 MRI images across 4 classes",
+    stack: ["TensorFlow/Keras", "OpenCV", "CNN (LeNet)"],
+    toolIds: ["tensorflow", "opencv"],
+    links: { github: todo("Brain Tumor Detection repo URL") },
+  },
+  {
+    slug: "resume-screening",
+    title: "Resume Screening Using ML",
+    tracks: ["ml", "data"],
+    summary:
+      "Multi-label resume classification with TF-IDF and OneVsRest, comparing KNN, Decision Tree, and Random Forest with 5-fold stratified cross-validation.",
+    stack: ["scikit-learn", "TF-IDF", "OneVsRest", "KNN", "Decision Tree", "Random Forest"],
+    toolIds: ["scikit-learn"],
+    links: { github: todo("Resume Screening repo URL") },
+  },
+  {
+    slug: "drug-corpora-scraping",
+    title: "Drug Corpora Web Scraping",
+    tracks: ["data"],
+    summary:
+      "Keyword-driven BeautifulSoup scrapers that collect medical text from NHS and WebMD, with regex cleanup, benchmarked against Sketch Engine.",
+    stack: ["BeautifulSoup", "Regex", "Sketch Engine"],
+    toolIds: ["beautifulsoup"],
+    links: { github: todo("Drug Corpora repo URL") },
+  },
+  {
+    slug: "investor-risk-tolerance",
+    title: "Investor Risk Tolerance Prediction",
+    tracks: ["data"],
+    summary:
+      "Random Forest regression on the Federal Reserve's Survey of Consumer Finances (SCF) dataset, tuned with GridSearchCV.",
+    highlight: "0.76 validation R²",
+    stack: ["Random Forest", "GridSearchCV", "SCF dataset"],
+    toolIds: [],
+    links: { github: todo("Investor Risk repo URL") },
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Experience (same on every track)                                           */
+/* -------------------------------------------------------------------------- */
+
+export interface Experience {
+  role: string;
+  org: string;
+  orgNote?: string;
+  period: string;
+  bullets: string[];
+  toolIds: ToolId[];
+  /** Links the entry to its case study page, when there is one. */
+  caseStudy?: CaseStudySlug;
+}
+
+/** Most recent first. */
+export const experience: Experience[] = [
+  {
+    role: "Project Manager and QA Lead",
+    org: "AOWA Knowledge Graph",
+    orgNote: "with industry partner Efeeo (efeeo4good)",
+    period: "Fall 2026",
+    bullets: [
+      "Split 15 validator gaps across 3 engineers by domain and led code review of the team's core PR.",
+      "Owned the safety boundary and responsible-AI compliance for a source-labeled knowledge graph of hospital anesthesia resources.",
+      "Designed 4 Python safety validation rules and expanded CI from 30 to 96 automated tests.",
+    ],
+    toolIds: ["python", "neo4j", "pytest", "regex-validation", "github-actions"],
+    caseStudy: "aowa-knowledge-graph",
+  },
+  {
+    role: "Data Analytics Associate",
+    org: "Northeastern University",
+    period: "Jan 2026 to Jul 2026",
+    bullets: [
+      "Replaced manual operational bottlenecks with automated workflows (SQL, Airtable, Power Automate, Power BI), eliminating 90%+ of manual processing for 100+ students and coordinators.",
+      "Queried, cleaned, and validated 774+ records with Python (Pandas, NumPy) and SQL.",
+      "Built dashboards tracking student placements, event attendance, and program participation.",
+      "Explained insights to the Dean and senior leadership, who used them to launch new student programs.",
+    ],
+    toolIds: ["sql", "power-bi", "python", "numpy"],
+  },
+  {
+    role: "AI Intern",
+    org: "Amdocs",
+    period: "Jul 2024 to Dec 2024",
+    bullets: [
+      "Built and deployed Python ML pipelines for text classification and entity extraction on unstructured enterprise data, improving processing speed by 2x.",
+      "Built Power BI dashboards tracking AI adoption metrics and presented weekly readouts to engineering leads.",
+    ],
+    toolIds: ["python", "power-bi"],
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Publications                                                               */
+/* -------------------------------------------------------------------------- */
+
+export interface Publication {
+  title: string;
+  venue: string;
+  year: number;
+  authorRole: "First author" | "Co-author";
+  highlight?: string;
+  doi?: string;
+  href: OrTodo<string>;
+}
+
+export const publications: Publication[] = [
+  {
+    title: "Parkinson's Disease Prediction: Integrating ML Techniques and Drug NER",
+    venue: "Vidhyayana ICSSCC-2025",
+    year: 2025,
+    authorRole: "First author",
+    highlight: "XGBoost reached 92.30% accuracy",
+    href: todo("Parkinson's paper link"),
+  },
+  {
+    title: "Creating Drugs Related Corpora for Efficient Drug NER",
+    venue: "Vidhyayana ICTSM-2024",
+    year: 2024,
+    authorRole: "Co-author",
+    href: todo("Drug NER paper link"),
+  },
+  {
+    title: "Crop Prediction Analysis Using Machine Learning Techniques",
+    venue: "IEEE ICSCNA 2023",
+    year: 2023,
+    authorRole: "Co-author",
+    doi: "10.1109/ICSCNA58489.2023.10370674",
+    href: "https://doi.org/10.1109/ICSCNA58489.2023.10370674",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Education                                                                  */
+/* -------------------------------------------------------------------------- */
+
+export interface Education {
+  school: string;
+  degree: string;
+  location: string;
+  period: string;
+  grade: string;
+}
+
+export const education: Education[] = [
+  {
+    school: "Northeastern University",
+    degree: "MS, Computer Science",
+    location: "Seattle",
+    period: "2025 to 2027",
+    grade: "GPA 3.8/4.0",
+  },
+  {
+    school: "MIT World Peace University",
+    degree: "BTech, Computer Science (AI and Data Science)",
+    location: "Pune",
+    period: "2021 to 2025",
+    grade: "CGPA 8.98/10",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  Awards and involvement                                                     */
+/* -------------------------------------------------------------------------- */
+
+export interface Recognition {
+  title: string;
+  detail: string;
+  kind: "award" | "involvement";
+  caseStudy?: CaseStudySlug;
+}
+
+export const recognition: Recognition[] = [
+  {
+    title: "Judges' Choice Award",
+    detail: "Defense Tech Jam Seattle 2026, for GHOSTLINE",
+    kind: "award",
+    caseStudy: "ghostline",
+  },
+  {
+    title: "Global Learner Support Ambassador",
+    detail: "Northeastern University, Seattle",
+    kind: "involvement",
+  },
+  {
+    title: "Volunteer",
+    detail: "DubHacks 26",
+    kind: "involvement",
+  },
+];
+
+/* -------------------------------------------------------------------------- */
+/*  "Ask my portfolio" chatbot                                                 */
+/* -------------------------------------------------------------------------- */
+
+export const chatbot = {
+  title: "Ask my portfolio",
+  greeting: "Hi! I can answer questions about Sakshi's projects, experience, and skills.",
+  starters: [
+    "What has she built with RAG?",
+    "What's her strongest SWE project?",
+    "Does she have data pipeline experience?",
+  ],
+  /** Shown when the bot doesn't know the answer. */
+  fallbackContact: profile.email,
+};
