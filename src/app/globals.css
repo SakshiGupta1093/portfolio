@@ -90,6 +90,40 @@
   --shadow-lift: 0 2px 4px var(--shadow-tint), 0 16px 36px -12px var(--shadow-tint-strong);
 }
 
+/* Animations (Tailwind v4: --animate-* creates an animate-* utility). */
+@theme {
+  --animate-slide-up: slide-up 250ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+
+  @keyframes slide-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
+/* Soft warm glow behind the hero. Gradients are cheaper to paint than blurred shapes. */
+.hero-glow {
+  background:
+    radial-gradient(42rem 30rem at 8% -5%, var(--primary-soft), transparent 70%),
+    radial-gradient(34rem 26rem at 100% 35%, var(--secondary-soft), transparent 70%);
+}
+
+/* Track switching uses the View Transitions API: keep it quick and gentle. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 220ms;
+}
+
+::view-transition-group(*) {
+  animation-duration: 320ms;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
 @layer base {
   html {
     scroll-behavior: smooth;

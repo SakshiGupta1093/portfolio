@@ -6,10 +6,12 @@
  *
  * Editing rules:
  * 1. Only verified facts. Never add a metric, skill, feature, or employer that isn't real.
- * 2. Anything missing uses todo("what is missing"). During `npm run dev` these show
- *    up as dashed TODO badges; production builds hide them automatically.
- *    Search this file for `todo(` to find every gap.
+ * 2. Anything missing uses todo("what is missing"). The site hides TODO values
+ *    completely (no empty buttons or placeholder text). To list what's left, run:
+ *        npm run todos
  * 3. House style: no em dashes in any copy.
+ * 4. Keep this file free of imports. Build scripts (npm run todos, and the chatbot's
+ *    knowledge.json generator) load it directly with Node.
  */
 
 /* -------------------------------------------------------------------------- */
@@ -95,10 +97,18 @@ export const profile = {
   openTo: "Open to SWE, ML/AI, and Data roles",
   location: "Seattle",
   email: "sakshigupta1093@gmail.com",
+  /** Hero photo. Set to null to hide it; the hero is designed to work either way. */
   headshot: {
     src: "/images/headshot.jpg",
     alt: "Portrait of Sakshi Gupta smiling outdoors",
-  },
+  } as { src: string; alt: string } | null,
+  /** "At a glance" card in the hero. */
+  highlights: [
+    { icon: "education", text: "MS Computer Science, Northeastern University (GPA 3.8/4.0)" },
+    { icon: "award", text: "Judges' Choice Award, Defense Tech Jam Seattle 2026" },
+    { icon: "work", text: "Previously AI Intern at Amdocs and Data Analytics Associate at Northeastern" },
+    { icon: "publication", text: "3 publications, including IEEE ICSCNA 2023" },
+  ] as { icon: "education" | "award" | "work" | "publication"; text: string }[],
   /** About section: 3 short lines. */
   about: [
     "I'm an MS Computer Science student at Northeastern University in Seattle, working as a versatile generalist across full-stack development, ML pipelines, and agentic AI tooling.",
@@ -159,6 +169,7 @@ export const tools = {
   tensorflow: "TensorFlow/Keras",
   "scikit-learn": "scikit-learn",
   xgboost: "XGBoost",
+  pandas: "Pandas",
   numpy: "NumPy",
   // LLMs and agents
   transformers: "Hugging Face Transformers",
@@ -242,11 +253,22 @@ export const techStack: Record<FocusTrack, StackGroup[]> = {
   data: [
     { name: "Languages", allCategory: "Languages", tools: ["python", "sql", "r"] },
     { name: "Databases", allCategory: "Databases", tools: ["duckdb", "postgresql", "mysql", "neo4j", "hadoop"] },
-    { name: "Analysis and ML", allCategory: "Machine learning", tools: ["scikit-learn", "xgboost", "numpy"] },
+    { name: "Analysis and ML", allCategory: "Machine learning", tools: ["scikit-learn", "xgboost", "pandas", "numpy"] },
     { name: "Dashboards", allCategory: "Dashboards", tools: ["power-bi", "streamlit"] },
     { name: "Data collection and quality", allCategory: "Data collection and quality", tools: ["beautifulsoup", "regex-validation", "pytest", "github-actions"] },
   ],
 };
+
+/**
+ * What to show when a tool is clicked but no project on the page used it.
+ * Order of preference: matching projects, then matching experience entries,
+ * then a note from this list, then the neutral fallback.
+ */
+export const toolNotes: Partial<Record<ToolId, string>> = {
+  aws: "AWS Academy Cloud Foundations certified",
+};
+
+export const toolFallbackNote = "Used outside the projects listed here.";
 
 /* -------------------------------------------------------------------------- */
 /*  Featured case studies                                                      */
@@ -300,9 +322,27 @@ export interface CaseStudy {
   stack: string[];
   /** Tools from the Tech Stack section that this project used (for click-to-highlight). */
   toolIds: ToolId[];
-  /** null means "not applicable" (for example, a project that only runs locally has no live demo). */
-  links: { github: OrTodo<string> | null; demo: OrTodo<string> | null };
-  screenshots: OrTodo<{ src: string; alt: string }[]>;
+  /**
+   * null means "not applicable" (for example, a project that only runs locally has no live demo).
+   * repoReady: false keeps the GitHub link off the site (and out of the chatbot) until
+   * the repo shows the full project. Omit it or set it to true to show the link.
+   */
+  links: { github: OrTodo<string> | null; repoReady?: boolean; demo: OrTodo<string> | null };
+  /**
+   * Optional. An empty list hides the screenshot area, and the architecture
+   * diagram is the main visual. To add one:
+   *   1. Drop the image in assets/screenshots/ (it is copied to public/ on dev and build).
+   *   2. Add { src: "/screenshots/your-file.png", alt: "What the screenshot shows" } here.
+   */
+  screenshots: Screenshot[];
+}
+
+export interface Screenshot {
+  /** Path under public/, for example "/screenshots/edgarquery-answer.png". */
+  src: string;
+  /** Describes what the image shows, for screen readers. */
+  alt: string;
+  caption?: string;
 }
 
 /** Listed in the order used on the "All" track. */
@@ -352,6 +392,33 @@ export const caseStudies: CaseStudy[] = [
       note: "Runs locally, end to end.",
     },
     decisions: [
+      // These first five come from the Phase 1 decisions log in the repo's PROGRESS.md
+      // (ingestion, parsing, chunking, embeddings, FAISS).
+      {
+        title: "Split sections on text, not HTML",
+        detail:
+          "Filers use very different markup for headings, but the \"Item N.\" wording is mandated, so sections are found with regex over the extracted text. Because every filing repeats its headings in a table of contents, the longest span between headings wins.",
+      },
+      {
+        title: "Keep financial figures intact",
+        detail:
+          "Text extraction strands $, %, and the parentheses around negative numbers on their own lines. Rather than dropping those symbols, the cleaner reattaches them to their numbers so figures aren't corrupted.",
+      },
+      {
+        title: "Chunks are exact slices of the filing",
+        detail:
+          "Each chunk is a verbatim substring of its section, stored with character offsets, so a retrieved hit can always be cited back to the exact source text.",
+      },
+      {
+        title: "Exact FAISS search on normalized vectors",
+        detail:
+          "bge-small vectors are L2-normalized at encode time, so inner product equals cosine similarity in a plain IndexFlatIP. An exact index (not an approximate one) means retrieval metrics measure the embeddings, not an approximation's recall loss.",
+      },
+      {
+        title: "Guard against silent mismatches",
+        detail:
+          "The index and its metadata live in one object that refuses to load if their lengths disagree, and the metadata records which embedding model built the index. Queries use that same model, with a dimension check on every search, so a mismatch fails loudly instead of returning plausible nonsense.",
+      },
       {
         title: "Retrieve wide, then re-rank",
         detail:
@@ -383,7 +450,10 @@ export const caseStudies: CaseStudy[] = [
       },
     ],
     results: [], // No metric numbers yet, so the Results section is hidden.
-    next: todo("EDGARQuery: what you'd do next"),
+    next: [
+      "Run the eval harness on a labeled question set and publish precision, recall, and faithfulness numbers.",
+      "Try a larger generation model and compare it against Qwen2.5-1.5B.",
+    ],
     stack: [
       "Python",
       "SEC EDGAR API",
@@ -398,8 +468,13 @@ export const caseStudies: CaseStudy[] = [
       "GitHub Actions",
     ],
     toolIds: ["python", "faiss", "embeddings", "cross-encoder", "langchain", "crewai", "rag", "llm-judge", "pytest", "github-actions"],
-    links: { github: todo("EDGARQuery repo URL"), demo: null },
-    screenshots: todo("EDGARQuery screenshots (add to assets/screenshots)"),
+    links: {
+      github: "https://github.com/SakshiGupta1093/EDGARQuery",
+      // Only Phase 1 is pushed so far. Flip to true once the full project is on GitHub.
+      repoReady: false,
+      demo: null,
+    },
+    screenshots: [],
   },
   {
     slug: "ghostline",
@@ -410,7 +485,7 @@ export const caseStudies: CaseStudy[] = [
     teamLabel: "Team of 4",
     badges: ["Judges' Choice Award", "Fully offline, no backend"],
     problem: [
-      "When should people trust an AI, and when should they question it? GHOSTLINE explores human-AI trust calibration through a turn-based tactical game.",
+      "When should players trust an AI teammate, and when should they question it? GHOSTLINE explores human-AI trust calibration through a turn-based tactical game.",
       "Our team of 4 won the Judges' Choice Award at Defense Tech Jam Seattle in September 2026.",
       "The game runs fully offline in the browser with no backend: about 18k lines of vanilla JavaScript covering game logic, a Three.js 3D scene, audio, speech, and gamepad input.",
     ],
@@ -469,14 +544,16 @@ export const caseStudies: CaseStudy[] = [
       { value: "~6.5M", label: "assertions in state-space verification", scope: "team" },
       { value: "~18k", label: "lines of code, fully offline", scope: "team" },
     ],
-    next: todo("GHOSTLINE: what you'd do next"),
+    next: [
+      "Run playtests to measure whether players' trust in the AI teammate actually calibrates over a session.",
+    ],
     stack: ["Three.js", "GSAP", "Vite", "Vanilla JS (ES modules)", "Web Audio API", "Web Speech API", "Gamepad API"],
     toolIds: ["threejs", "javascript"],
     links: {
-      github: todo("GHOSTLINE repo URL"),
+      github: "https://github.com/SakshiGupta1093/ghostline",
       demo: "https://ghostline-eta.vercel.app/",
     },
-    screenshots: todo("GHOSTLINE screenshots (add to assets/screenshots)"),
+    screenshots: [],
   },
   {
     slug: "aowa-knowledge-graph",
@@ -561,15 +638,15 @@ export const caseStudies: CaseStudy[] = [
       { value: "67", label: "test cases written", scope: "mine" },
       { value: "5", label: "validator blind spots covered by 4 new safety rules", scope: "mine" },
     ],
-    // Keep planned features out of this list (per partner agreement).
-    next: todo("AOWA: what you'd do next (do not mention planned features)"),
+    // Keep planned features (chatbot over the graph, synthetic data) out of this list.
+    next: ["Expand coverage with clinician-collected data from more hospitals using the field templates."],
     stack: ["Python", "CSV (source of record)", "Neo4j", "Cypher", "pytest", "Regex validation", "GitHub Actions"],
     toolIds: ["python", "neo4j", "pytest", "regex-validation", "github-actions"],
     links: {
       github: todo("AOWA repo URL, only if Efeeo allows sharing"),
       demo: null,
     },
-    screenshots: todo("AOWA screenshots, with no partner data (add to assets/screenshots)"),
+    screenshots: [], // If added later: no partner data in any image.
   },
   {
     slug: "fraud-detection",
@@ -621,14 +698,17 @@ export const caseStudies: CaseStudy[] = [
       { value: "78%", label: "precision at 65% recall (XGBoost)" },
       { value: "6.3M", label: "transactions analyzed" },
     ],
-    next: todo("Fraud Detection: what you'd do next"),
-    stack: ["DuckDB", "SQL window functions", "Isolation Forest", "XGBoost", "Streamlit"],
-    toolIds: ["duckdb", "sql", "xgboost", "streamlit"],
+    next: [
+      "Tune the decision threshold around the cost of missed fraud versus false alarms.",
+      "Test the model on newer data.",
+    ],
+    stack: ["Python", "DuckDB", "SQL window functions", "Isolation Forest", "XGBoost", "Streamlit"],
+    toolIds: ["python", "duckdb", "sql", "xgboost", "streamlit"],
     links: {
       github: todo("Fraud Detection repo URL"),
-      demo: todo("Fraud Detection Streamlit demo URL, if it is deployed (otherwise set to null)"),
+      demo: null, // No Streamlit demo link in links.txt.
     },
-    screenshots: todo("Fraud Detection dashboard screenshots (add to assets/screenshots)"),
+    screenshots: [],
   },
 ];
 
@@ -647,7 +727,8 @@ export interface Project {
   highlight?: string;
   stack: string[];
   toolIds: ToolId[];
-  links: { github: OrTodo<string> };
+  /** repoReady: false hides the link until the repo is ready to share. */
+  links: { github: OrTodo<string>; repoReady?: boolean };
 }
 
 export const projects: Project[] = [
@@ -671,7 +752,7 @@ export const projects: Project[] = [
       "Web Speech API",
     ],
     toolIds: ["python", "fastapi", "postgresql", "nextjs", "typescript", "tailwind"],
-    links: { github: todo("EchoCoach repo URL") },
+    links: { github: "https://github.com/vatsalp2008/EchoCoach" },
   },
   {
     slug: "multi-llm-eval",
@@ -681,7 +762,7 @@ export const projects: Project[] = [
       "Sends the same prompt to GPT-4, Claude, and Gemini concurrently through OpenRouter and scores the answers with an LLM judge on accuracy, groundedness, and reasoning. If one provider fails, the run continues.",
     stack: ["FastAPI", "asyncio", "OpenRouter", "GPT-4", "Claude", "Gemini", "LLM-as-judge", "React", "TypeScript"],
     toolIds: ["fastapi", "asyncio", "llm-judge", "react", "typescript"],
-    links: { github: todo("Multi-LLM Eval repo URL") },
+    links: { github: "https://github.com/SakshiGupta1093/Multi-LLM-Eval" },
   },
   {
     slug: "third-place-finder",
@@ -693,7 +774,7 @@ export const projects: Project[] = [
     highlight: "Used by many classmates",
     stack: ["React", "TypeScript", "Node/Express", "MySQL", "Groq", "Leaflet"],
     toolIds: ["react", "typescript", "node-express", "mysql"],
-    links: { github: todo("Third Place Finder repo URL") },
+    links: { github: "https://github.com/shravanibnikam/Third-Place-Finder-Web" },
   },
   {
     slug: "rideshare-dispatch-simulator",
@@ -711,9 +792,9 @@ export const projects: Project[] = [
     title: "Email Workflow Automation",
     tracks: ["ml"],
     summary: "Agents classify, summarize, and route Gmail messages into ClickUp tasks using tool calling.",
-    stack: ["Python", "Gmail API", "Gemini API", "LangChain", "CrewAI"],
-    toolIds: ["python", "langchain", "crewai"],
-    links: { github: todo("Email Automation repo URL") },
+    stack: ["Python", "Gmail API", "OAuth", "Gemini API", "LangChain", "CrewAI"],
+    toolIds: ["python", "oauth", "langchain", "crewai"],
+    links: { github: "https://github.com/SakshiGupta1093/Email-Workflow-Automation-using-Agentic-AI" },
   },
   {
     slug: "document-similarity",
@@ -744,7 +825,7 @@ export const projects: Project[] = [
       "Multi-label resume classification with TF-IDF and OneVsRest, comparing KNN, Decision Tree, and Random Forest with 5-fold stratified cross-validation.",
     stack: ["scikit-learn", "TF-IDF", "OneVsRest", "KNN", "Decision Tree", "Random Forest"],
     toolIds: ["scikit-learn"],
-    links: { github: todo("Resume Screening repo URL") },
+    links: { github: "https://github.com/SakshiGupta1093/Resume-Screening-Using-Machine-Learning-Techniques" },
   },
   {
     slug: "drug-corpora-scraping",
@@ -763,8 +844,8 @@ export const projects: Project[] = [
     summary:
       "Random Forest regression on the Federal Reserve's Survey of Consumer Finances (SCF) dataset, tuned with GridSearchCV.",
     highlight: "0.76 validation R²",
-    stack: ["Random Forest", "GridSearchCV", "SCF dataset"],
-    toolIds: [],
+    stack: ["Python", "scikit-learn", "Random Forest", "GridSearchCV", "SCF dataset"],
+    toolIds: ["python", "scikit-learn"],
     links: { github: todo("Investor Risk repo URL") },
   },
 ];
@@ -776,7 +857,8 @@ export const projects: Project[] = [
 export interface Experience {
   role: string;
   org: string;
-  orgNote?: string;
+  /** Shown as a label so a project isn't mistaken for a job. */
+  label?: string;
   period: string;
   bullets: string[];
   toolIds: ToolId[];
@@ -789,7 +871,7 @@ export const experience: Experience[] = [
   {
     role: "Project Manager and QA Lead",
     org: "AOWA Knowledge Graph",
-    orgNote: "with industry partner Efeeo (efeeo4good)",
+    label: "Industry-sponsored project (Northeastern x Efeeo)",
     period: "Fall 2026",
     bullets: [
       "Split 15 validator gaps across 3 engineers by domain and led code review of the team's core PR.",
@@ -809,7 +891,7 @@ export const experience: Experience[] = [
       "Built dashboards tracking student placements, event attendance, and program participation.",
       "Explained insights to the Dean and senior leadership, who used them to launch new student programs.",
     ],
-    toolIds: ["sql", "power-bi", "python", "numpy"],
+    toolIds: ["sql", "power-bi", "python", "pandas", "numpy"],
   },
   {
     role: "AI Intern",
@@ -819,7 +901,7 @@ export const experience: Experience[] = [
       "Built and deployed Python ML pipelines for text classification and entity extraction on unstructured enterprise data, improving processing speed by 2x.",
       "Built Power BI dashboards tracking AI adoption metrics and presented weekly readouts to engineering leads.",
     ],
-    toolIds: ["python", "power-bi"],
+    toolIds: ["python", "power-bi", "sql"],
   },
 ];
 
@@ -844,14 +926,14 @@ export const publications: Publication[] = [
     year: 2025,
     authorRole: "First author",
     highlight: "XGBoost reached 92.30% accuracy",
-    href: todo("Parkinson's paper link"),
+    href: "http://www.vidhyayanaejournal.org/index.php/journal/article/view/e5j3jh60",
   },
   {
     title: "Creating Drugs Related Corpora for Efficient Drug NER",
     venue: "Vidhyayana ICTSM-2024",
     year: 2024,
     authorRole: "Co-author",
-    href: todo("Drug NER paper link"),
+    href: "https://link.springer.com/chapter/10.1007/978-981-96-1452-3_23",
   },
   {
     title: "Crop Prediction Analysis Using Machine Learning Techniques",

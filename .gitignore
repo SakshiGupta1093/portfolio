@@ -37,6 +37,9 @@ yarn-error.log*
 # .env.example is a safe template with empty values, so it IS committed.
 !.env.example
 
+# generated from assets/screenshots by scripts/sync-screenshots.mjs
+/public/screenshots/
+
 # vercel
 .vercel
 

@@ -3,10 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
+    "predev": "node scripts/sync-screenshots.mjs",
     "dev": "next dev",
+    "prebuild": "node scripts/sync-screenshots.mjs",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "todos": "node --no-warnings scripts/todos.mjs"
+  },
+  "engines": {
+    "node": ">=22.18"
   },
   "dependencies": {
     "next": "16.4.6",
