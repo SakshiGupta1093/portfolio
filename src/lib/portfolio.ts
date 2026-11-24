@@ -79,6 +79,11 @@ export function countDrafts(study: CaseStudy): number {
   return problem + decisions;
 }
 
+/** Experience entries to show: approved ones, plus drafts while reviewing in dev. */
+export function getExperience(): Reviewed<Experience>[] {
+  return reviewedList(experience);
+}
+
 /* ------------------------------ Case studies ------------------------------ */
 
 export function getCaseStudy(slug: string): CaseStudy | undefined {
@@ -152,12 +157,15 @@ export interface ToolUsage {
   note: string | null;
 }
 
+/** Approved experience entries only (drafts never count as evidence for a tool). */
+const approvedExperience = experience.filter((e): e is Experience => !isDraft(e));
+
 /** Everything on the site that used a tool, based only on the tags in content.ts. */
 export function getToolUsage(tool: ToolId): ToolUsage {
   return {
     caseStudies: caseStudies.filter((s) => s.toolIds.includes(tool)),
     projects: projects.filter((p) => p.toolIds.includes(tool)),
-    experience: experience.filter((e) => e.toolIds.includes(tool)),
+    experience: approvedExperience.filter((e) => e.toolIds.includes(tool)),
     note: toolNotes[tool] ?? null,
   };
 }

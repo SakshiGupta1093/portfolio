@@ -2,8 +2,9 @@ import { profile } from "@/data/content";
 import { SocialLinks } from "./SocialLinks";
 
 /**
- * Minimal footer for now (Round 4 fills it in). Below 1280px it carries the social
- * icons, since the fixed desktop rail isn't shown there.
+ * Minimal by design: name, location, and (below 1280px, where the fixed desktop rail
+ * isn't shown) the social icons. The "Built with Next.js, Tailwind, and Groq" line
+ * (site.builtWith) is added in Round 5, once the Groq chatbot actually exists.
  * The bottom padding keeps footer content clear of the floating chat button
  * (bottom right, coming in Round 5) when the page is scrolled all the way down.
  */

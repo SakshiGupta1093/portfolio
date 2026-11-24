@@ -740,8 +740,13 @@ export const caseStudies: CaseStudy[] = [
 ];
 
 /* -------------------------------------------------------------------------- */
-/*  More projects grid                                                         */
+/*  More projects (carousel on All, grid on a track)                           */
 /* -------------------------------------------------------------------------- */
+
+export interface Stat {
+  value: string;
+  label: string;
+}
 
 export interface Project {
   slug: string;
@@ -750,8 +755,14 @@ export interface Project {
   summary: string;
   /** Team context, only when known (for example "Two-person team"). */
   context?: string;
-  /** A real outcome or number, only when given. */
+  /** A real outcome that isn't a number, only when given (for example "Used by many classmates"). */
   highlight?: string;
+  /**
+   * The card's stat row: up to 3 real numbers, exactly as given in Sakshi's notes.
+   * Never invent a number or derive one (for example by counting listed items).
+   * A project without stats shows its tools in that spot instead.
+   */
+  stats?: Stat[];
   stack: string[];
   toolIds: ToolId[];
   /** repoReady: false hides the link until the repo is ready to share. */
@@ -809,7 +820,11 @@ export const projects: Project[] = [
     tracks: ["swe"],
     summary:
       "An event-driven Java simulation of ride dispatch using the Strategy and Observer patterns, ReentrantLock concurrency, and Java Streams.",
-    highlight: "100% completion across 3 load scenarios, up to 250 concurrent rides",
+    stats: [
+      { value: "250", label: "concurrent rides" },
+      { value: "3", label: "load scenarios" },
+      { value: "100%", label: "completion" },
+    ],
     stack: ["Java", "Strategy pattern", "Observer pattern", "ReentrantLock", "Java Streams"],
     toolIds: ["java"],
     links: { github: todo("Rideshare Simulator repo URL") },
@@ -829,7 +844,7 @@ export const projects: Project[] = [
     tracks: ["ml"],
     summary: "Compares TF-IDF, Doc2Vec, and BERT embeddings for document similarity using cosine similarity.",
     context: "Joint work",
-    highlight: "BERT performed best, at 0.821",
+    stats: [{ value: "0.821", label: "best score (BERT)" }],
     stack: ["spaCy", "NLTK", "Gensim", "Sentence-Transformers", "TF-IDF", "Doc2Vec", "BERT"],
     toolIds: ["spacy", "nltk", "gensim", "sentence-transformers", "embeddings"],
     links: { github: todo("Document Similarity repo URL") },
@@ -839,7 +854,10 @@ export const projects: Project[] = [
     title: "Brain Tumor Detection",
     tracks: ["ml"],
     summary: "A simplified LeNet CNN that classifies MRI scans into 4 classes, trained with data augmentation.",
-    highlight: "3,264 MRI images across 4 classes",
+    stats: [
+      { value: "3,264", label: "MRI images" },
+      { value: "4", label: "classes" },
+    ],
     stack: ["TensorFlow/Keras", "OpenCV", "CNN (LeNet)"],
     toolIds: ["tensorflow", "opencv"],
     links: { github: todo("Brain Tumor Detection repo URL") },
@@ -860,6 +878,10 @@ export const projects: Project[] = [
     tracks: ["data"],
     summary:
       "Keyword-driven BeautifulSoup scrapers that collect medical text from NHS and WebMD, with regex cleanup, benchmarked against Sketch Engine.",
+    stats: [
+      { value: "395K+", label: "characters (NHS)" },
+      { value: "7.9K+", label: "words (WebMD)" },
+    ],
     stack: ["BeautifulSoup", "Regex", "Sketch Engine"],
     toolIds: ["beautifulsoup"],
     links: { github: todo("Drug Corpora repo URL") },
@@ -870,7 +892,7 @@ export const projects: Project[] = [
     tracks: ["data"],
     summary:
       "Random Forest regression on the Federal Reserve's Survey of Consumer Finances (SCF) dataset, tuned with GridSearchCV.",
-    highlight: "0.76 validation R²",
+    stats: [{ value: "0.76", label: "validation R²" }],
     stack: ["Python", "scikit-learn", "Random Forest", "GridSearchCV", "SCF dataset"],
     toolIds: ["python", "scikit-learn"],
     links: { github: todo("Investor Risk repo URL") },
@@ -886,15 +908,26 @@ export interface Experience {
   org: string;
   /** Shown as a label so a project isn't mistaken for a job. */
   label?: string;
-  period: string;
-  bullets: string[];
+  period: OrTodo<string>;
+  bullets: OrTodo<string[]>;
   toolIds: ToolId[];
   /** Links the entry to its case study page, when there is one. */
   caseStudy?: CaseStudySlug;
 }
 
-/** Most recent first. */
-export const experience: Experience[] = [
+/** Most recent first. A draft() entry is hidden on the live site (and kept out of the chatbot). */
+export const experience: OrDraft<Experience>[] = [
+  {
+    role: "Global Learner Support (GLS) Student Ambassador",
+    org: "Northeastern University (Seattle, WA)",
+    period: "Jul 2026 to Present",
+    bullets: [
+      "Plan and run Global Village, a year-long cultural event series that helps international and domestic students connect, handling activity design, scheduling, budgeting, materials, and on-site execution.",
+      "Collaborate with GLS staff, campus partners, and student leaders on event strategy, delegating tasks and coordinating resources to drive student participation.",
+      "Design and facilitate interactive activities, including a table-host format that makes it easier for introverted students to join in, along with cultural exchange sessions and presentations on global traditions and student experiences.",
+    ],
+    toolIds: [],
+  },
   {
     role: "Project Manager and QA Lead",
     org: "AOWA Knowledge Graph",
@@ -1012,17 +1045,13 @@ export interface Recognition {
   caseStudy?: CaseStudySlug;
 }
 
+// GLS Ambassador lives under Experience now, so it isn't listed twice.
 export const recognition: Recognition[] = [
   {
     title: "Judges' Choice Award",
     detail: "Defense Tech Jam Seattle 2026, for GHOSTLINE",
     kind: "award",
     caseStudy: "ghostline",
-  },
-  {
-    title: "Global Learner Support Ambassador",
-    detail: "Northeastern University, Seattle",
-    kind: "involvement",
   },
   {
     title: "Volunteer",

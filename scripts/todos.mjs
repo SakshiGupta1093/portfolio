@@ -10,13 +10,17 @@ const content = await import(new URL("../src/data/content.ts", import.meta.url).
 function preview(value) {
   if (typeof value === "string") return value;
   if (value && typeof value === "object" && "title" in value) return `${value.title}: ${value.detail}`;
+  if (value && typeof value === "object" && "role" in value) return `Experience entry: ${value.role}, ${value.org}`;
   return JSON.stringify(value);
 }
 
-/** Walks any value and returns [kind, path, text] for each todo() and draft() marker. */
+/**
+ * Walks any value and returns [kind, path, text] for each todo() and draft() marker.
+ * TODOs inside a draft (like a draft Experience entry's missing dates) are listed too.
+ */
 function collect(value, path) {
   if (content.isTodo(value)) return [["todo", path, value.todo]];
-  if (content.isDraft(value)) return [["draft", path, preview(value.draft)]];
+  if (content.isDraft(value)) return [["draft", path, preview(value.draft)], ...collect(value.draft, path)];
   if (Array.isArray(value)) {
     return value.flatMap((item, i) =>
       collect(item, `${path}[${item && typeof item === "object" && "slug" in item ? item.slug : i}]`),

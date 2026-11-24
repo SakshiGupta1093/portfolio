@@ -8,6 +8,8 @@ const NAV = [
   { href: "#work", label: "Work" },
   { href: "#stack", label: "Stack" },
   { href: "#projects", label: "Projects" },
+  // Hidden on small tablets, where five links don't fit beside the name.
+  { href: "#experience", label: "Experience", className: "hidden md:block" },
 ] as const;
 
 const brandClass = "font-display text-lg font-extrabold text-ink transition-colors hover:text-primary";
@@ -36,7 +38,7 @@ export function SiteHeader({ onHome = true }: { onHome?: boolean }) {
           <nav aria-label="Sections" className="hidden sm:block">
             <ul className="flex items-center gap-1">
               {NAV.map((item) => (
-                <li key={item.href}>
+                <li key={item.href} className={"className" in item ? item.className : undefined}>
                   {onHome ? (
                     <SectionLink href={item.href} className={navClass}>
                       {item.label}

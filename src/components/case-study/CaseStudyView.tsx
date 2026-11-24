@@ -8,7 +8,7 @@ import { cn } from "@/lib/cn";
 import { countDrafts, href, known, repoHref, reviewed, reviewedList, SHOW_DRAFTS } from "@/lib/portfolio";
 import { ArchitectureDiagram } from "./ArchitectureDiagram";
 import { BackLink } from "./BackLink";
-import { DraftBanner, DraftBlock, DraftText } from "./Draft";
+import { DraftBanner, DraftBlock, DraftText } from "@/components/ui/Draft";
 
 /*
  * One layout for all 4 case studies (Sakshi's template):

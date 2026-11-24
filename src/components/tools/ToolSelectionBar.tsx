@@ -6,9 +6,15 @@ import { summarizeTool, toolLabel } from "@/lib/portfolio";
 import { setTrack, useTrack } from "@/lib/track-store";
 import { useToolSelection } from "./ToolSelection";
 
-/** Scrolls to the first highlighted card and moves keyboard focus into it. */
+/**
+ * Scrolls to the first highlighted card and moves keyboard focus into it. Only cards
+ * actually on screen count: the reduced-motion row and the carousel both exist on the
+ * All view (CSS shows one), and carousel cards parked out of view are hidden.
+ */
 function jumpToFirstMatch() {
-  const card = document.querySelector<HTMLElement>('[data-highlighted="true"]');
+  const card = [...document.querySelectorAll<HTMLElement>('[data-highlighted="true"]')].find(
+    (el) => el.checkVisibility({ visibilityProperty: true }) && !el.closest("[inert]"),
+  );
   if (!card) return;
   card.scrollIntoView({ block: "center" });
   const link = card.querySelector<HTMLElement>("a");
