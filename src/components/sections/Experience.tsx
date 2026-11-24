@@ -1,5 +1,3 @@
-import { CaseStudyLink } from "@/components/case-study/CaseStudyLink";
-import { ArrowRightIcon } from "@/components/icons";
 import { DraftBlock } from "@/components/ui/Draft";
 import { Section, SectionHeading } from "@/components/ui/Section";
 import { chip } from "@/components/ui/styles";
@@ -7,7 +5,8 @@ import { isTodo } from "@/data/content";
 import { getExperience, known, toolLabel } from "@/lib/portfolio";
 
 /**
- * Experience: the same on every track, newest first. Server component (no client JS).
+ * Experience: jobs and campus roles, the same on every track, newest first. Projects
+ * (AOWA included) live in Featured work and More projects instead. Server component.
  * A draft() entry (none right now) only renders in `npm run dev`, outlined, with
  * any missing fields shown as TODO placeholders.
  */
@@ -39,11 +38,6 @@ export function Experience() {
                     )}
                   </div>
                   <p className="mt-1 font-semibold text-secondary">{job.org}</p>
-                  {job.label && (
-                    <p className="mt-3 inline-flex rounded-pill border border-line px-3 py-1 text-xs font-semibold text-ink-muted">
-                      {job.label}
-                    </p>
-                  )}
 
                   {bullets ? (
                     <ul className="mt-4 space-y-2.5">
@@ -58,27 +52,14 @@ export function Experience() {
                     isDraft && isTodo(job.bullets) && <TodoNote text={job.bullets.todo} className="mt-4" />
                   )}
 
-                  {(job.toolIds.length > 0 || job.caseStudy) && (
-                    <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
-                      {job.toolIds.length > 0 && (
-                        <ul className="flex flex-wrap gap-1.5" aria-label="Tools">
-                          {job.toolIds.map((id) => (
-                            <li key={id} className={chip}>
-                              {toolLabel(id)}
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                      {job.caseStudy && (
-                        <CaseStudyLink
-                          slug={job.caseStudy}
-                          className="group inline-flex items-center gap-1.5 text-sm font-semibold text-primary"
-                        >
-                          Read the case study
-                          <ArrowRightIcon width={16} height={16} className="transition-transform group-hover:translate-x-1" />
-                        </CaseStudyLink>
-                      )}
-                    </div>
+                  {job.toolIds.length > 0 && (
+                    <ul className="mt-5 flex flex-wrap gap-1.5" aria-label="Tools">
+                      {job.toolIds.map((id) => (
+                        <li key={id} className={chip}>
+                          {toolLabel(id)}
+                        </li>
+                      ))}
+                    </ul>
                   )}
                 </article>
               </DraftBlock>

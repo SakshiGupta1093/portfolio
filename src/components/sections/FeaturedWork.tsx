@@ -15,8 +15,7 @@ export function FeaturedWork() {
     <Section id="work" labelledBy="work-title">
       <SectionHeading
         id="work-title"
-        eyebrow="Featured case studies"
-        title="Selected work"
+        title="Top Repositories"
         description={
           track === "all"
             ? "In-depth write-ups covering the problem, my role, the architecture, and the results."

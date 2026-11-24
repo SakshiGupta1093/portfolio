@@ -72,8 +72,8 @@ export interface TrackInfo {
   hash: string;
   /** Hero tagline for this track. */
   tagline: string;
-  /** Resume the Resume button downloads on this track. */
-  resume: { href: string; downloadName: string };
+  /** Resume PDF the Resume button opens (in a new tab) on this track. */
+  resume: { href: string };
 }
 
 export const tracks: Record<Track, TrackInfo> = {
@@ -82,28 +82,28 @@ export const tracks: Record<Track, TrackInfo> = {
     label: "All",
     hash: "",
     tagline: "Versatile engineer across full-stack, ML pipelines, and agentic AI",
-    resume: { href: "/resumes/resume-general.pdf", downloadName: "Sakshi_Gupta_Resume.pdf" },
+    resume: { href: "/resumes/resume-general.pdf" },
   },
   swe: {
     id: "swe",
     label: "SWE",
     hash: "swe",
     tagline: "Full-stack and distributed systems builder",
-    resume: { href: "/resumes/resume-swe.pdf", downloadName: "Sakshi_Gupta_Resume_SWE.pdf" },
+    resume: { href: "/resumes/resume-swe.pdf" },
   },
   ml: {
     id: "ml",
     label: "ML/AI",
     hash: "ml",
     tagline: "RAG, agents, and LLM evaluation",
-    resume: { href: "/resumes/resume-ml.pdf", downloadName: "Sakshi_Gupta_Resume_ML.pdf" },
+    resume: { href: "/resumes/resume-ml.pdf" },
   },
   data: {
     id: "data",
     label: "Data",
     hash: "data",
     tagline: "Data pipelines, validation, and dashboards",
-    resume: { href: "/resumes/resume-data.pdf", downloadName: "Sakshi_Gupta_Resume_Data.pdf" },
+    resume: { href: "/resumes/resume-data.pdf" },
   },
 };
 
@@ -906,16 +906,16 @@ export const projects: Project[] = [
 export interface Experience {
   role: string;
   org: string;
-  /** Shown as a label so a project isn't mistaken for a job. */
-  label?: string;
   period: OrTodo<string>;
   bullets: OrTodo<string[]>;
   toolIds: ToolId[];
-  /** Links the entry to its case study page, when there is one. */
-  caseStudy?: CaseStudySlug;
 }
 
-/** Most recent first. A draft() entry is hidden on the live site (and kept out of the chatbot). */
+/**
+ * Jobs and campus roles only, most recent first. Projects (like AOWA, which Sakshi isn't
+ * allowed to list as experience) belong in caseStudies or projects, never here.
+ * A draft() entry is hidden on the live site (and kept out of the chatbot).
+ */
 export const experience: OrDraft<Experience>[] = [
   {
     role: "Global Learner Support (GLS) Student Ambassador",
@@ -927,19 +927,6 @@ export const experience: OrDraft<Experience>[] = [
       "Design and facilitate interactive activities, including a table-host format that makes it easier for introverted students to join in, along with cultural exchange sessions and presentations on global traditions and student experiences.",
     ],
     toolIds: [],
-  },
-  {
-    role: "Project Manager and QA Lead",
-    org: "AOWA Knowledge Graph",
-    label: "Industry-sponsored project (Northeastern x Efeeo)",
-    period: "Fall 2026",
-    bullets: [
-      "Split 15 validator gaps across 3 engineers by domain and led code review of the team's core PR.",
-      "Owned the safety boundary and responsible-AI compliance for a source-labeled knowledge graph of hospital anesthesia resources.",
-      "Designed 4 Python safety validation rules and expanded CI from 30 to 96 automated tests.",
-    ],
-    toolIds: ["python", "neo4j", "pytest", "regex-validation", "github-actions"],
-    caseStudy: "aowa-knowledge-graph",
   },
   {
     role: "Data Analytics Associate",

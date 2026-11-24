@@ -25,12 +25,13 @@ export function ProjectsGrid() {
     <Section id="projects" labelledBy="projects-title">
       <SectionHeading
         id="projects-title"
-        eyebrow="More projects"
-        title="Other things I've built"
+        title="More projects"
         description={
-          track === "all"
-            ? `All ${projects.length} projects across software, ML/AI, and data.`
-            : `Showing ${list.length} of ${projects.length} projects tagged ${tracks[track].label}.`
+          track === "all" ? (
+            <AllViewHint />
+          ) : (
+            `Showing ${list.length} of ${projects.length} projects tagged ${tracks[track].label}.`
+          )
         }
       />
       <div className="mt-8" style={{ viewTransitionName: "more-projects" }}>
@@ -54,5 +55,24 @@ export function ProjectsGrid() {
         )}
       </div>
     </Section>
+  );
+}
+
+/**
+ * How to use the carousel, worded for how it actually works on this device: mouse
+ * (drag, hover pauses), touch (swipe, the pause button stops it), or reduced motion
+ * (a plain scrolling row). CSS picks the sentence, so it's right on first paint.
+ * Not every card has numbers or a public repo yet, hence "when available".
+ */
+function AllViewHint() {
+  return (
+    <>
+      <span className="motion-reduce:hidden">
+        <span className="pointer-coarse:hidden">Drag to spin or use the arrows, and hover to pause.</span>
+        <span className="hidden pointer-coarse:inline">Swipe to spin or use the arrows, and tap pause to stop it.</span>
+      </span>
+      <span className="hidden motion-reduce:inline">Scroll sideways to browse.</span> Each card shows what the
+      project does and its tools, plus key numbers and a link to the code when available.
+    </>
   );
 }
