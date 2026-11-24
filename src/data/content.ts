@@ -12,6 +12,11 @@
  * 3. House style: no em dashes in any copy.
  * 4. Keep this file free of imports. Build scripts (npm run todos, and the chatbot's
  *    knowledge.json generator) load it directly with Node.
+ * 5. Wording Claude wrote that is NOT taken directly from Sakshi's notes (usually a
+ *    "why" sentence) is wrapped in draft(...). Drafts are highlighted in `npm run dev`
+ *    and hidden on the live site (and kept out of the chatbot) until approved.
+ *    To approve: delete the draft( ) wrapper and keep the text, edited if needed.
+ *    To reject: delete the line. `npm run todos` lists every draft still waiting.
  */
 
 /* -------------------------------------------------------------------------- */
@@ -20,7 +25,7 @@
 
 export type Todo = { readonly todo: string };
 
-/** Marks missing content. The UI hides it in production and flags it in dev. */
+/** Marks missing content. The UI hides it everywhere until it is filled in. */
 export const todo = (what: string): Todo => ({ todo: what });
 
 export function isTodo(value: unknown): value is Todo {
@@ -33,6 +38,22 @@ export function isTodo(value: unknown): value is Todo {
 
 /** A value we have, or a TODO describing what is missing. */
 export type OrTodo<T> = T | Todo;
+
+/* -------------------------------------------------------------------------- */
+/*  Draft helper (see editing rule 5)                                          */
+/* -------------------------------------------------------------------------- */
+
+export type Draft<T> = { readonly draft: T };
+
+/** Marks wording Claude wrote that Sakshi hasn't approved yet. Hidden on the live site. */
+export const draft = <T>(value: T): Draft<T> => ({ draft: value });
+
+export function isDraft<T>(value: T | Draft<T>): value is Draft<T> {
+  return typeof value === "object" && value !== null && !Array.isArray(value) && "draft" in value;
+}
+
+/** Approved wording, or a draft waiting for review. */
+export type OrDraft<T> = T | Draft<T>;
 
 /* -------------------------------------------------------------------------- */
 /*  Tracks (All | SWE | ML/AI | Data)                                          */
@@ -126,7 +147,8 @@ export const site = {
   title: "Sakshi Gupta | Software, ML/AI, and Data",
   description:
     "Portfolio of Sakshi Gupta, MS Computer Science student at Northeastern University in Seattle. Full-stack systems, RAG and agentic AI, and data pipelines.",
-  url: todo("Production URL after the first Vercel deploy (used for SEO and Open Graph)") as OrTodo<string>,
+  /** Production URL (Vercel, deployed from main). Used for canonical links, Open Graph, and the sitemap. */
+  url: "https://sakshigupta.vercel.app",
   builtWith: "Built with Next.js, Tailwind, and Groq",
 };
 
@@ -300,6 +322,14 @@ export interface Result {
   scope?: "team" | "mine";
 }
 
+export interface Decision {
+  title: string;
+  /** What was done. */
+  detail: string;
+  /** Optional reasoning, shown right after the detail. Wrapped in draft() when Claude wrote it. */
+  why?: OrDraft<string>;
+}
+
 export interface CaseStudy {
   slug: CaseStudySlug;
   title: string;
@@ -311,10 +341,12 @@ export interface CaseStudy {
   teamLabel: OrTodo<string>;
   /** Short highlight pills for the card. */
   badges: string[];
-  problem: string[];
+  /** Paragraphs. A draft() paragraph is hidden on the live site until approved. */
+  problem: OrDraft<string>[];
   role: OrTodo<{ summary: string; groups: { heading: string; items: string[] }[] }>;
   architecture: Architecture;
-  decisions: { title: string; detail: string }[];
+  /** A whole decision can be a draft(), or just its `why`. */
+  decisions: OrDraft<Decision>[];
   /** Only real numbers. An empty list hides the Results section. */
   results: Result[];
   next: OrTodo<string[]>;
@@ -357,7 +389,8 @@ export const caseStudies: CaseStudy[] = [
     badges: ["Multi-agent RAG", "Works end to end, runs locally"],
     problem: [
       "SEC 10-K and 10-Q filings are long, and the answer to a question can sit in narrative text, a table, or a chart.",
-      "EDGARQuery pulls filings from the SEC EDGAR API, indexes all three kinds of content, and answers questions with a citation to the exact filing and section, so every answer can be checked.",
+      "EDGARQuery pulls 10-K and 10-Q filings from the SEC EDGAR API, indexes their narrative text, tables, and charts, and answers each question with a citation to the source filing and section.",
+      "That way, every answer can be checked against the filing it came from.",
     ],
     role: {
       summary:
@@ -392,8 +425,9 @@ export const caseStudies: CaseStudy[] = [
       note: "Runs locally, end to end.",
     },
     decisions: [
-      // These first five come from the Phase 1 decisions log in the repo's PROGRESS.md
-      // (ingestion, parsing, chunking, embeddings, FAISS).
+      // All five come from the Phase 1 decisions log in the repo's PROGRESS.md
+      // (ingestion, parsing, chunking, embeddings, FAISS). Decisions for the later
+      // phases get added here once that code is pushed.
       {
         title: "Split sections on text, not HTML",
         detail:
@@ -418,35 +452,6 @@ export const caseStudies: CaseStudy[] = [
         title: "Guard against silent mismatches",
         detail:
           "The index and its metadata live in one object that refuses to load if their lengths disagree, and the metadata records which embedding model built the index. Queries use that same model, with a dimension check on every search, so a mismatch fails loudly instead of returning plausible nonsense.",
-      },
-      {
-        title: "Retrieve wide, then re-rank",
-        detail:
-          "FAISS over bge-small embeddings finds candidate passages quickly, then a cross-encoder scores each candidate against the question so the strongest evidence reaches the model.",
-      },
-      {
-        title: "Index tables and charts, not just text",
-        detail:
-          "Filings carry important information in tables and charts, so these are indexed alongside narrative text and retrieved with CLIP/ColPali.",
-      },
-      {
-        title: "Specialist agents",
-        detail:
-          "LangChain/CrewAI routes each question to a narrative, financials, or risk factors agent, so each agent handles one kind of question.",
-      },
-      {
-        title: "Verify and cite every answer",
-        detail:
-          "A self-reflection step re-checks weak answers, and every answer cites its source filing and section so a reader can confirm it.",
-      },
-      {
-        title: "Evaluation wired into CI",
-        detail:
-          "A custom harness measures retrieval precision and recall plus LLM-as-judge faithfulness, and it runs with pytest in GitHub Actions on every change.",
-      },
-      {
-        title: "A small model that runs locally",
-        detail: "Generation uses Qwen2.5-1.5B, and the full pipeline runs on a local machine.",
       },
     ],
     results: [], // No metric numbers yet, so the Results section is hidden.
@@ -485,8 +490,8 @@ export const caseStudies: CaseStudy[] = [
     teamLabel: "Team of 4",
     badges: ["Judges' Choice Award", "Fully offline, no backend"],
     problem: [
-      "When should players trust an AI teammate, and when should they question it? GHOSTLINE explores human-AI trust calibration through a turn-based tactical game.",
-      "Our team of 4 won the Judges' Choice Award at Defense Tech Jam Seattle in September 2026.",
+      "When should a player trust an AI teammate, and when should they question it?",
+      "GHOSTLINE is a turn-based 3D tactical game that explores human-AI trust calibration. Our team of 4 won the Judges' Choice Award at Defense Tech Jam Seattle in September 2026.",
       "The game runs fully offline in the browser with no backend: about 18k lines of vanilla JavaScript covering game logic, a Three.js 3D scene, audio, speech, and gamepad input.",
     ],
     role: {
@@ -520,7 +525,8 @@ export const caseStudies: CaseStudy[] = [
     decisions: [
       {
         title: "No backend",
-        detail: "The whole game runs in the browser and works fully offline, so there is no server to deploy or keep running.",
+        detail: "The whole game runs in the browser and works fully offline.",
+        why: "There is no server to deploy or keep running.",
       },
       {
         title: "Vanilla JavaScript with ES modules",
@@ -528,11 +534,13 @@ export const caseStudies: CaseStudy[] = [
       },
       {
         title: "Exhaustive state-space verification",
-        detail: "Instead of spot-checking a few scenarios, the tests verify the game's state space exhaustively, about 6.5M assertions in total.",
+        detail: "The tests verify the game's state space exhaustively, about 6.5M assertions in total.",
+        why: "That covers far more situations than spot-checking a few hand-picked scenarios.",
       },
       {
-        title: "Test the way a player plays",
-        detail: "Headless end-to-end tests run in Chromium with simulated gamepad input, so the real input path is covered.",
+        title: "End-to-end tests with simulated gamepad input",
+        detail: "Headless end-to-end tests run in Chromium with simulated gamepad input.",
+        why: "That way the real controller input path is tested, not just the game logic behind it.",
       },
       {
         title: "Built on browser APIs",
@@ -595,7 +603,7 @@ export const caseStudies: CaseStudy[] = [
     },
     architecture: {
       summary:
-        "Facts live in CSV files as the source of record, each with a provenance label and review status. Python safety validation rules check every field across the data files. The knowledge graph is stored in Neo4j and queried with Cypher, covering 3 hospital levels and 6 categories, with unknowns recorded as gaps. pytest suites run in GitHub Actions.",
+        "Facts live in CSV files as the source of record, each with a provenance label and review status. Python safety validation rules check every field across the CSV files, and the knowledge graph is then built from them in Neo4j and queried with Cypher, covering 3 hospital levels and 6 categories, with unknowns recorded as gaps. pytest suites run in GitHub Actions.",
       stages: [
         { title: "Source of record", items: ["CSV files", "Provenance label per fact", "Review status per fact"] },
         { title: "Validation", items: ["Python safety rules", "Regex checks on every field", "No flagged values in logs"] },
@@ -610,24 +618,26 @@ export const caseStudies: CaseStudy[] = [
     decisions: [
       {
         title: "CSV as the source of record",
-        detail: "Facts live in plain CSV files, and the Neo4j graph is built from them.",
+        detail: "Facts live in plain CSV files, the project's source of record.",
+        why: "The Neo4j graph is built from them.",
       },
       {
         title: "Provenance on every fact",
-        detail: "Every fact carries a provenance label and a review status, so it is clear where it came from and whether it has been checked.",
+        detail: "Every fact carries a provenance label and a review status.",
+        why: "That makes it clear where each fact came from and whether it has been checked.",
       },
       {
         title: "Record unknowns as gaps",
-        detail:
-          "Missing knowledge is recorded as an explicit gap instead of being guessed, so the 18-cell coverage map (3 hospital levels x 6 categories) shows what is not known.",
+        detail: "Unknowns are recorded as explicit gaps on the 18-cell coverage map (3 hospital levels x 6 categories).",
+        why: "Missing knowledge is never guessed, so the map shows what is not known.",
       },
       {
-        title: "A hard safety boundary",
+        title: "A safety boundary",
         detail: "The graph contains no treatment or dosing advice.",
       },
       {
         title: "Keep partner data out of logs",
-        detail: "Validation errors never print the flagged values, so partner data stays out of CI logs.",
+        detail: "Validation errors never print the flagged values, which keeps partner data out of CI logs.",
       },
     ],
     results: [
@@ -654,16 +664,30 @@ export const caseStudies: CaseStudy[] = [
     tracks: ["data"],
     summary:
       "Fraud detection on 6.3M PaySim transactions, with SQL feature engineering in DuckDB, Isolation Forest vs XGBoost, and a Streamlit dashboard.",
-    teamLabel: todo("Fraud Detection: solo or team?"),
+    teamLabel: "Solo project",
     badges: ["6.3M transactions", "0.55 PR-AUC"],
     problem: [
       "Fraud is a small fraction of a very large stream of transactions, so a useful model has to catch fraud without burying reviewers in false alarms.",
-      "This project works with 6.3M PaySim transactions and evaluates models the way they would be used: trained on earlier transactions and tested on later ones.",
+      "This project works with 6.3M PaySim transactions. Models are trained on earlier transactions and tested on later ones.",
     ],
-    role: todo("Fraud Detection: your role, and whether it was solo or a team"),
+    role: {
+      summary:
+        "Solo project. I did everything myself: data processing, feature engineering, modeling, and the Streamlit dashboard.",
+      groups: [
+        {
+          heading: "What I built",
+          items: [
+            "Data processing for 6.3M PaySim transactions in DuckDB",
+            "Feature engineering: time-series features with SQL window functions",
+            "Modeling: Isolation Forest compared against XGBoost on a time-based train/test split",
+            "The Streamlit dashboard",
+          ],
+        },
+      ],
+    },
     architecture: {
       summary:
-        "6.3M PaySim transactions are loaded into DuckDB. Time-series features are built with SQL window functions. Isolation Forest and XGBoost are compared using a time-based train/test split, and results are shown in a Streamlit dashboard.",
+        "6.3M PaySim transactions are loaded into DuckDB. Time-series features are built with SQL window functions. Isolation Forest and XGBoost are compared using a time-based train/test split, and a Streamlit dashboard shows the model outputs.",
       stages: [
         { title: "Data", items: ["6.3M PaySim transactions", "DuckDB"] },
         { title: "Features", items: ["SQL window functions", "Time-series features"] },
@@ -674,7 +698,8 @@ export const caseStudies: CaseStudy[] = [
     decisions: [
       {
         title: "DuckDB for 6.3M rows",
-        detail: "DuckDB runs analytical SQL over the full dataset in-process, with no database server to manage.",
+        detail: "All 6.3M PaySim transactions are loaded into DuckDB.",
+        why: "DuckDB runs analytical SQL over the full dataset in-process, with no database server to manage.",
       },
       {
         title: "Features in SQL",
@@ -682,11 +707,13 @@ export const caseStudies: CaseStudy[] = [
       },
       {
         title: "Time-based split",
-        detail: "Training on earlier transactions and testing on later ones keeps future information out of training.",
+        detail: "Models are trained on earlier transactions and tested on later ones.",
+        why: "That keeps future information out of training.",
       },
       {
-        title: "Unsupervised vs supervised",
-        detail: "Isolation Forest (anomaly detection) was compared against XGBoost (supervised classification).",
+        title: "Isolation Forest vs XGBoost",
+        detail: "An Isolation Forest was compared against XGBoost.",
+        why: "The comparison puts unsupervised anomaly detection up against supervised classification.",
       },
       {
         title: "Metrics that fit rare events",

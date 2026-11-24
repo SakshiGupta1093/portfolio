@@ -6,6 +6,7 @@ import {
   ALL_STACK_CATEGORIES,
   caseStudies,
   experience,
+  isDraft,
   isTodo,
   projects,
   techStack,
@@ -15,6 +16,7 @@ import {
   type CaseStudy,
   type Experience,
   type FocusTrack,
+  type OrDraft,
   type OrTodo,
   type Project,
   type ToolId,
@@ -39,6 +41,48 @@ export function repoHref(links: { github: OrTodo<string> | null; repoReady?: boo
 /** The value, or null if it's still a todo. */
 export function known<T>(value: OrTodo<T>): T | null {
   return isTodo(value) ? null : value;
+}
+
+/* -------------------------------- Drafts -------------------------------- */
+
+/**
+ * Drafts (wording Claude wrote, wrapped in draft() in content.ts) are shown and
+ * highlighted in `npm run dev` so Sakshi can review them, and left out of every
+ * production build, so nothing unapproved can reach the live site.
+ */
+export const SHOW_DRAFTS = process.env.NODE_ENV !== "production";
+
+export interface Reviewed<T> {
+  value: T;
+  isDraft: boolean;
+}
+
+/** Unwraps a value that may be a draft. Null when it's missing, or a draft in production. */
+export function reviewed<T>(value: OrDraft<T> | undefined): Reviewed<T> | null {
+  if (value === undefined) return null;
+  if (isDraft(value)) return SHOW_DRAFTS ? { value: value.draft, isDraft: true } : null;
+  return { value, isDraft: false };
+}
+
+/** The items to show from a list that may contain drafts. */
+export function reviewedList<T>(values: OrDraft<T>[]): Reviewed<T>[] {
+  return values.flatMap((v) => {
+    const item = reviewed(v);
+    return item ? [item] : [];
+  });
+}
+
+/** How many drafts are waiting for review on a case study (whole decisions or just a "why"). */
+export function countDrafts(study: CaseStudy): number {
+  const problem = study.problem.filter((p) => isDraft(p)).length;
+  const decisions = study.decisions.filter((d) => isDraft(d) || (d.why !== undefined && isDraft(d.why))).length;
+  return problem + decisions;
+}
+
+/* ------------------------------ Case studies ------------------------------ */
+
+export function getCaseStudy(slug: string): CaseStudy | undefined {
+  return caseStudies.find((s) => s.slug === slug);
 }
 
 /* ----------------------------- Tech stack ----------------------------- */

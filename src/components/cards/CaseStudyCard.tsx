@@ -7,6 +7,7 @@ import { badge, cardBase, chip } from "@/components/ui/styles";
 import type { CaseStudy } from "@/data/content";
 import { cn } from "@/lib/cn";
 import { href, known, toolLabel } from "@/lib/portfolio";
+import { isPlainClick, rememberHopFromHome } from "@/lib/return-to-home";
 
 const MAX_CHIPS = 6;
 
@@ -15,6 +16,7 @@ export function CaseStudyCard({ study, pickLabel }: { study: CaseStudy; pickLabe
   const team = known(study.teamLabel);
   const demo = href(study.links.demo);
   const extra = study.stack.length - MAX_CHIPS;
+  const casePath = `/projects/${study.slug}`;
 
   return (
     <article
@@ -41,7 +43,10 @@ export function CaseStudyCard({ study, pickLabel }: { study: CaseStudy; pickLabe
       <h3 className="mt-3 text-2xl text-ink">
         {/* Stretched link: the whole card is clickable, but there's one link for screen readers. */}
         <Link
-          href={`/projects/${study.slug}`}
+          href={casePath}
+          onClick={(event) => {
+            if (isPlainClick(event)) rememberHopFromHome(casePath);
+          }}
           className="transition-colors after:absolute after:inset-0 after:rounded-card group-hover:text-primary focus-visible:outline-none"
         >
           {study.title}

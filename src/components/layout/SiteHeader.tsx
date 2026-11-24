@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { profile } from "@/data/content";
 import { SectionLink } from "./SectionLink";
@@ -9,27 +10,42 @@ const NAV = [
   { href: "#projects", label: "Projects" },
 ] as const;
 
-export function SiteHeader() {
+const brandClass = "font-display text-lg font-extrabold text-ink transition-colors hover:text-primary";
+const navClass =
+  "rounded-pill px-3 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink";
+
+/**
+ * On the home page, links scroll to sections without touching the URL hash (it holds
+ * the selected track). On other pages (case studies), they go to the home page and
+ * jump to the section, e.g. /#work.
+ */
+export function SiteHeader({ onHome = true }: { onHome?: boolean }) {
   return (
     <header className="sticky top-0 z-30 border-b border-line/70 bg-canvas/80 backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-4 px-5 sm:px-8">
-        <SectionLink
-          href="#top"
-          className="font-display text-lg font-extrabold text-ink transition-colors hover:text-primary"
-        >
-          {profile.name}
-        </SectionLink>
+        {onHome ? (
+          <SectionLink href="#top" className={brandClass}>
+            {profile.name}
+          </SectionLink>
+        ) : (
+          <Link href="/" className={brandClass}>
+            {profile.name}
+          </Link>
+        )}
         <div className="flex items-center gap-2">
           <nav aria-label="Sections" className="hidden sm:block">
             <ul className="flex items-center gap-1">
               {NAV.map((item) => (
                 <li key={item.href}>
-                  <SectionLink
-                    href={item.href}
-                    className="rounded-pill px-3 py-2 text-sm font-medium text-ink-muted transition-colors hover:bg-surface-2 hover:text-ink"
-                  >
-                    {item.label}
-                  </SectionLink>
+                  {onHome ? (
+                    <SectionLink href={item.href} className={navClass}>
+                      {item.label}
+                    </SectionLink>
+                  ) : (
+                    <Link href={`/${item.href}`} className={navClass}>
+                      {item.label}
+                    </Link>
+                  )}
                 </li>
               ))}
             </ul>

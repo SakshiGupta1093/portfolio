@@ -1,18 +1,9 @@
 import Image from "next/image";
-import {
-  AwardIcon,
-  BookOpenIcon,
-  BriefcaseIcon,
-  GithubIcon,
-  GraduationCapIcon,
-  LinkedinIcon,
-  MailIcon,
-  MapPinIcon,
-} from "@/components/icons";
+import { AwardIcon, BookOpenIcon, BriefcaseIcon, GraduationCapIcon, MapPinIcon } from "@/components/icons";
+import { SocialLinks } from "@/components/layout/SocialLinks";
 import { ResumeButton } from "@/components/track/ResumeButton";
 import { TrackSwitcher } from "@/components/track/TrackSwitcher";
 import { TrackTagline } from "@/components/track/TrackTagline";
-import { buttonSecondary } from "@/components/ui/styles";
 import { profile } from "@/data/content";
 import { cn } from "@/lib/cn";
 
@@ -59,21 +50,10 @@ export function Hero() {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <ResumeButton />
-            <a href={profile.links.github} target="_blank" rel="noopener noreferrer" className={buttonSecondary}>
-              <GithubIcon width={18} height={18} />
-              GitHub
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-            <a href={profile.links.linkedin} target="_blank" rel="noopener noreferrer" className={buttonSecondary}>
-              <LinkedinIcon width={18} height={18} />
-              LinkedIn
-              <span className="sr-only">(opens in a new tab)</span>
-            </a>
-            <a href={profile.links.email} className={buttonSecondary}>
-              <MailIcon width={18} height={18} />
-              Email
-            </a>
           </div>
+          {/* Below 1280px: icons sit under the Resume button. From 1280px they live in the
+              fixed bottom-left rail instead. -ml-2.5 lines the first glyph up with the text. */}
+          <SocialLinks className="mt-4 -ml-2.5 xl:hidden" />
         </div>
 
         {headshot && (
